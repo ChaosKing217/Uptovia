@@ -148,6 +148,12 @@
     flex-wrap: wrap;
 }
 
+.monitor-search-filters {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .filter-group {
     display: flex;
     gap: var(--space-2);
@@ -167,4 +173,76 @@
     font-size: var(--text-sm);
     background: var(--background);
     color: var(--text-primary);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .monitor-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+
+    .monitor-stats {
+        width: 100%;
+        justify-content: space-between;
+        gap: var(--space-3);
+    }
+
+    .monitor-stat {
+        text-align: left;
+    }
+
+    .monitor-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .monitor-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .monitor-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+
+    .monitor-title {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .monitor-search-filters {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .monitor-search-filters > div {
+        width: 100%;
+    }
+
+    #tagFilter,
+    #statusFilter {
+        width: 100%;
+        min-width: auto !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .monitor-item {
+        padding: var(--space-3);
+    }
+
+    .monitor-stats {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .monitor-actions {
+        flex-wrap: wrap;
+    }
 }

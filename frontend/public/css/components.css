@@ -500,3 +500,69 @@
     font-size: var(--text-sm);
     color: var(--text-secondary);
 }
+
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Modal adjustments for mobile */
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        margin: var(--space-4);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: var(--space-4);
+    }
+
+    .modal-body {
+        padding: var(--space-4);
+    }
+
+    .modal-footer {
+        padding: var(--space-4);
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .modal-footer button {
+        width: 100%;
+    }
+
+    /* Table adjustments for mobile */
+    .data-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .data-table table {
+        min-width: 600px;
+    }
+
+    /* Content card adjustments */
+    .content-card {
+        padding: var(--space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    /* Further mobile optimizations */
+    .modal-content {
+        margin: var(--space-2);
+        border-radius: var(--radius-md);
+    }
+
+    .content-card {
+        padding: var(--space-3);
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        padding: var(--space-3) var(--space-4);
+    }
+}

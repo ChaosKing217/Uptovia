@@ -189,3 +189,36 @@
 .back-to-login:hover {
     color: var(--text-primary);
 }
+
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE
+   ============================================ */
+
+@media (max-width: 480px) {
+    .login-screen {
+        padding: var(--space-4);
+    }
+
+    .login-header {
+        padding: var(--space-6) var(--space-4) var(--space-4);
+    }
+
+    .login-header h1 {
+        font-size: var(--text-xl);
+    }
+
+    .login-tabs {
+        padding: 0 var(--space-4);
+    }
+
+    .login-form {
+        padding: var(--space-4);
+    }
+
+    .theme-toggle-btn {
+        top: var(--space-3);
+        right: var(--space-3);
+        width: 36px;
+        height: 36px;
+    }
+}

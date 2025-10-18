@@ -216,3 +216,54 @@
     color: var(--text-secondary);
     margin-bottom: var(--space-4);
 }
+
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .settings-nav {
+        gap: var(--space-1);
+    }
+
+    .settings-tab {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+    }
+
+    .settings-section {
+        padding: var(--space-4);
+    }
+
+    .user-item,
+    .group-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+
+    .user-item-actions,
+    .group-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .theme-selector {
+        flex-direction: column;
+    }
+
+    .theme-option {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-section {
+        padding: var(--space-3);
+    }
+
+    .danger-zone {
+        padding: var(--space-3);
+    }
+}
