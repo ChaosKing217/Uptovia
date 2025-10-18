@@ -145,13 +145,18 @@
                     </div>
                 </div>
                 <div class="mobile-header-actions">
-                    <button class="mobile-logout-btn" onclick="logout()" title="Logout">
-                        <span>🚪</span>
-                    </button>
-                    <button class="mobile-theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-                        <span class="theme-icon">🌙</span>
+                    <button class="mobile-close-btn" onclick="toggleMobileMenu()" title="Close menu">
+                        <span>✕</span>
                     </button>
                 </div>
+            </div>
+            <div class="mobile-actions-row">
+                <button class="mobile-logout-btn" onclick="logout()" title="Logout">
+                    <span>🚪</span>
+                </button>
+                <button class="mobile-theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
             </div>
             <nav class="mobile-nav">
                 <a href="#" id="mobileDashboardNavItem" class="mobile-nav-item" onclick="showView('dashboard', event); toggleMobileMenu(); return false;" style="display: none;">
