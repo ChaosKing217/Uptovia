@@ -46,7 +46,7 @@ const requireAdmin = async (req, res, next) => {
 router.get('/admin/all', requireAdmin, async (req, res) => {
     try {
         const result = await db.query(
-            `SELECT id, username, email, is_admin, email_verified, email_verification_token, email_verification_expires, created_at
+            `SELECT id, username, email, is_admin, admin_created, email_verified, email_verification_token, email_verification_expires, created_at
              FROM users
              ORDER BY created_at DESC`
         );
@@ -181,8 +181,8 @@ router.post('/admin/create', requireAdmin, async (req, res) => {
 
         // Create user with temporary password (will be set during setup)
         const result = await db.query(
-            `INSERT INTO users (username, email, password_hash, api_key, email_verification_token, email_verification_expires)
-             VALUES ($1, $2, $3, $4, $5, $6)
+            `INSERT INTO users (username, email, password_hash, api_key, email_verification_token, email_verification_expires, admin_created)
+             VALUES ($1, $2, $3, $4, $5, $6, true)
              RETURNING id, username, email, created_at`,
             [username, email, tempPasswordHash, tempApiKey, setupToken, setupExpires]
         );

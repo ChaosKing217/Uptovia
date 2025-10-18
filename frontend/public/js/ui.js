@@ -187,3 +187,14 @@ export function closeAllModals() {
         modal.classList.remove('active');
     });
 }
+
+/**
+ * Toggle mobile menu
+ */
+export function toggleMobileMenu() {
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+    mobileSidebar.classList.toggle('active');
+    mobileMenuOverlay.classList.toggle('active');
+}

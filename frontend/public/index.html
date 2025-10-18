@@ -21,7 +21,7 @@
         <div class="login-container">
             <div class="login-card">
                 <div class="login-header">
-                    <div class="app-icon">🔍</div>
+                    <img src="/logo.png" alt="Uptime Logo" class="app-icon">
                     <h1>Uptime Monitor</h1>
                     <p>24/7 Server Monitoring Dashboard</p>
                 </div>
@@ -87,52 +87,94 @@
 
     <!-- Dashboard Screen -->
     <div id="dashboardScreen" class="dashboard-screen">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="app-logo">
-                    <a href="#" onclick="goToHome(); return false;" style="display: flex; align-items: center; gap: var(--space-3); text-decoration: none; flex: 1;">
-                        <img src="/logo.png" alt="Uptime Logo" style="width: 24px; height: 24px; object-fit: contain;">
-                        <span class="logo-text">Uptime</span>
-                    </a>
-                    <button class="theme-toggle-btn-small" onclick="toggleTheme()" id="themeToggle" title="Toggle theme">
-                        <span class="theme-icon">🌙</span>
-                    </button>
-                </div>
+        <!-- Top Menu Bar -->
+        <header class="top-menu">
+            <div class="menu-left">
+                <a href="#" onclick="goToHome(); return false;" class="menu-logo">
+                    <img src="/logo.png" alt="Uptime Logo">
+                    <span>Uptime</span>
+                </a>
             </div>
 
-            <nav class="sidebar-nav">
-                <a href="#" id="dashboardNavItem" class="nav-item" onclick="showView('dashboard', event); return false;" style="display: none;">
+            <nav class="menu-nav">
+                <a href="#" id="dashboardNavItem" class="menu-nav-item" onclick="showView('dashboard', event); return false;" style="display: none;">
                     <span class="nav-icon">📈</span>
                     <span class="nav-text">Dashboard</span>
                 </a>
-                <a href="#" class="nav-item active" onclick="showView('monitors', event); return false;">
+                <a href="#" class="menu-nav-item active" onclick="showView('monitors', event); return false;">
                     <span class="nav-icon">📊</span>
                     <span class="nav-text">Monitors</span>
                 </a>
-                <a href="#" class="nav-item" onclick="showView('tags', event); return false;">
+                <a href="#" class="menu-nav-item" onclick="showView('tags', event); return false;">
                     <span class="nav-icon">🏷️</span>
                     <span class="nav-text">Tags</span>
                 </a>
-                <a href="#" class="nav-item" onclick="showView('settings', event); return false;">
+                <a href="#" class="menu-nav-item" onclick="showView('settings', event); return false;">
                     <span class="nav-icon">⚙️</span>
                     <span class="nav-text">Settings</span>
                 </a>
             </nav>
 
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar">👤</div>
-                    <div class="user-details">
-                        <div class="user-name" id="sidebarUsername">User</div>
-                        <div class="user-role" id="sidebarUserRole">Member</div>
+            <div class="menu-right">
+                <button class="menu-theme-toggle" onclick="toggleTheme()" id="menuThemeToggle" title="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div class="menu-user">
+                    <div class="menu-user-info">
+                        <span class="menu-username" id="menuUsername">User</span>
+                        <span class="menu-user-role" id="menuUserRole">Member</span>
                     </div>
                 </div>
-                <button class="btn-logout" onclick="logout()">
-                    <span>🚪</span> Logout
+                <button class="menu-logout-btn" onclick="logout()" title="Logout">
+                    <span>🚪</span>
+                </button>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" id="mobileMenuToggle">
+                    <span>☰</span>
                 </button>
             </div>
-        </aside>
+        </header>
+
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar" id="mobileSidebar">
+            <div class="mobile-sidebar-header">
+                <div class="mobile-user-info">
+                    <div class="user-avatar">👤</div>
+                    <div>
+                        <div class="mobile-username" id="mobileUsername">User</div>
+                        <div class="mobile-user-role" id="mobileUserRole">Member</div>
+                    </div>
+                </div>
+                <div class="mobile-header-actions">
+                    <button class="mobile-logout-btn" onclick="logout()" title="Logout">
+                        <span>🚪</span>
+                    </button>
+                    <button class="mobile-theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+            <nav class="mobile-nav">
+                <a href="#" id="mobileDashboardNavItem" class="mobile-nav-item" onclick="showView('dashboard', event); toggleMobileMenu(); return false;" style="display: none;">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="mobile-nav-item active" onclick="showView('monitors', event); toggleMobileMenu(); return false;">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Monitors</span>
+                </a>
+                <a href="#" class="mobile-nav-item" onclick="showView('tags', event); toggleMobileMenu(); return false;">
+                    <span class="nav-icon">🏷️</span>
+                    <span class="nav-text">Tags</span>
+                </a>
+                <a href="#" class="mobile-nav-item" onclick="showView('settings', event); toggleMobileMenu(); return false;">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="toggleMobileMenu()"></div>
 
         <!-- Main Content -->
         <main class="main-content">

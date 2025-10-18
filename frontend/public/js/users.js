@@ -70,23 +70,11 @@ export function setStatusFilter(status) {
 function getUserStatus(user) {
     if (user.email_verified) {
         return 'verified';
-    } else if (user.email_verification_token && user.email_verification_expires) {
-        // Check if this is a setup token (48 hours) or verification token (24 hours)
-        // Calculate the expiry duration from creation
-        const expiresAt = new Date(user.email_verification_expires);
-        const createdAt = new Date(user.created_at);
-        const expiryDuration = expiresAt - createdAt;
-
-        // Setup tokens expire in ~48 hours, verification tokens in ~24 hours
-        const hoursDuration = expiryDuration / (1000 * 60 * 60);
-
-        // If expiry is > 36 hours, it's a setup token (invited user)
-        if (hoursDuration > 36) {
-            return 'invited';
-        } else {
-            return 'unverified';
-        }
+    } else if (user.admin_created) {
+        // User was created by admin and needs to complete account setup
+        return 'invited';
     } else {
+        // User self-registered and needs to verify email
         return 'unverified';
     }
 }

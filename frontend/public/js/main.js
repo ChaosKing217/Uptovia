@@ -4,7 +4,7 @@
 
 console.log('Main.js: Starting module load...');
 
-import { updateThemeIcon, toggleTheme, setTheme, showConfirm, openModal, closeModal } from './ui.js';
+import { updateThemeIcon, toggleTheme, setTheme, showConfirm, openModal, closeModal, toggleMobileMenu } from './ui.js';
 import { setCurrentUser, setAuthToken } from './state.js';
 import { showDashboard, showLoginScreen } from './navigation.js';
 
@@ -122,6 +122,7 @@ window.setTheme = setTheme;
 window.showConfirm = showConfirm;
 window.openModal = openModal;
 window.closeModal = closeModal;
+window.toggleMobileMenu = toggleMobileMenu;
 
 // Auth Functions
 window.showLoginForm = showLoginForm;

@@ -23,11 +23,16 @@ export async function showDashboard() {
     document.getElementById('dashboardScreen').classList.add('active');
 
     const user = getCurrentUser();
-    document.getElementById('sidebarUsername').textContent = user.username;
+
+    // Set username in all locations (desktop menu and mobile sidebar)
+    document.getElementById('menuUsername').textContent = user.username;
+    document.getElementById('mobileUsername').textContent = user.username;
 
     // Set user role based on their primary group
     if (user.groups && user.groups.length > 0) {
-        document.getElementById('sidebarUserRole').textContent = user.groups[0].name;
+        const roleName = user.groups[0].name;
+        document.getElementById('menuUserRole').textContent = roleName;
+        document.getElementById('mobileUserRole').textContent = roleName;
     }
 
     // Load data first to get updated user info
@@ -56,15 +61,25 @@ export async function showDashboard() {
 export function showView(viewName, e) {
     setCurrentView(viewName);
 
-    // Update nav items
-    document.querySelectorAll('.nav-item').forEach(item => {
+    // Update desktop nav items
+    document.querySelectorAll('.menu-nav-item').forEach(item => {
         item.classList.remove('active');
     });
 
-    // Update active state - find the nav item for this view
-    const navItem = document.querySelector(`.nav-item[onclick*="${viewName}"]`);
-    if (navItem) {
-        navItem.classList.add('active');
+    // Update mobile nav items
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Update active state - find the nav items for this view (both desktop and mobile)
+    const desktopNavItem = document.querySelector(`.menu-nav-item[onclick*="${viewName}"]`);
+    const mobileNavItem = document.querySelector(`.mobile-nav-item[onclick*="${viewName}"]`);
+
+    if (desktopNavItem) {
+        desktopNavItem.classList.add('active');
+    }
+    if (mobileNavItem) {
+        mobileNavItem.classList.add('active');
     }
 
     // Update views
@@ -136,16 +151,22 @@ async function loadData() {
         setCurrentUser({ ...user, ...data.user });
         localStorage.setItem('currentUser', JSON.stringify(getCurrentUser()));
 
-        // Update sidebar role with group info
+        // Update user role with group info in all locations
         const updatedUser = getCurrentUser();
         if (updatedUser.groups && updatedUser.groups.length > 0) {
-            document.getElementById('sidebarUserRole').textContent = updatedUser.groups[0].name;
+            const roleName = updatedUser.groups[0].name;
+            document.getElementById('menuUserRole').textContent = roleName;
+            document.getElementById('mobileUserRole').textContent = roleName;
         }
 
-        // Update dashboard nav visibility based on admin status
+        // Update dashboard nav visibility based on admin status (both desktop and mobile)
         const dashboardNavItem = document.getElementById('dashboardNavItem');
+        const mobileDashboardNavItem = document.getElementById('mobileDashboardNavItem');
         if (dashboardNavItem) {
             dashboardNavItem.style.display = updatedUser.is_admin ? 'flex' : 'none';
+        }
+        if (mobileDashboardNavItem) {
+            mobileDashboardNavItem.style.display = updatedUser.is_admin ? 'flex' : 'none';
         }
     } catch (error) {
         console.error('Failed to load user info:', error);

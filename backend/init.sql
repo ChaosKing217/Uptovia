@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     api_key VARCHAR(255) UNIQUE NOT NULL,
     is_admin BOOLEAN DEFAULT false,
+    admin_created BOOLEAN DEFAULT false,
     force_password_reset BOOLEAN DEFAULT false,
     force_username_change BOOLEAN DEFAULT false,
     reset_token VARCHAR(255),

@@ -32,8 +32,10 @@
 }
 
 .app-icon {
-    font-size: 40px;
+    width: 64px;
+    height: 64px;
     margin-bottom: var(--space-4);
+    object-fit: contain;
 }
 
 .login-header h1 {
