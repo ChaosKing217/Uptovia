@@ -1,0 +1,191 @@
+/* ============================================
+   LOGIN SCREEN - Minimal & Clean
+   ============================================ */
+
+.login-screen {
+    display: none;
+    min-height: 100vh;
+    background: var(--background);
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+}
+
+.login-screen.active {
+    display: flex;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 360px;
+}
+
+.login-card {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.login-header {
+    text-align: center;
+    padding: var(--space-10) var(--space-6) var(--space-6);
+}
+
+.app-icon {
+    font-size: 40px;
+    margin-bottom: var(--space-4);
+}
+
+.login-header h1 {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    margin-bottom: var(--space-2);
+    color: var(--text-primary);
+}
+
+.login-header p {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.login-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--space-6);
+}
+
+.login-tab {
+    flex: 1;
+    padding: var(--space-3) 0;
+    background: transparent;
+    border: none;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.login-tab.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--text-primary);
+}
+
+.login-form {
+    display: none;
+    padding: var(--space-6);
+}
+
+.login-form.active {
+    display: block;
+}
+
+.theme-toggle-btn {
+    position: fixed;
+    top: var(--space-4);
+    right: var(--space-4);
+    width: 40px;
+    height: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 18px;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    z-index: 10;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--background);
+}
+
+/* Password Reset Styles */
+.password-reset-screen {
+    display: none;
+    min-height: 100vh;
+    background: var(--background);
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+}
+
+.password-reset-screen.active {
+    display: flex;
+}
+
+.reset-password-form {
+    padding: var(--space-6);
+}
+
+.password-requirements {
+    margin-bottom: var(--space-4);
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
+}
+
+.requirement.met {
+    color: var(--success);
+}
+
+.requirement.met::before {
+    content: '✓';
+}
+
+.requirement:not(.met)::before {
+    content: '○';
+}
+
+.password-match-message {
+    font-size: var(--text-xs);
+    margin-top: var(--space-2);
+}
+
+.password-match-message.match {
+    color: var(--success);
+}
+
+.password-match-message.no-match {
+    color: var(--error);
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+    display: block;
+    text-align: center;
+    margin-top: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.forgot-password-link:hover {
+    color: var(--text-primary);
+}
+
+.back-to-login {
+    display: block;
+    text-align: center;
+    margin-top: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.back-to-login:hover {
+    color: var(--text-primary);
+}

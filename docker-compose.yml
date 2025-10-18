@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: uptime-monitor-db
+    environment:
+      POSTGRES_DB: uptime_monitor
+      POSTGRES_USER: ${POSTGRES_USER:-uptimeuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-uptimeuser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uptime-monitor-app
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      FRONTEND_PATH: /app/frontend/public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-uptimeuser}:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/uptime_monitor
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this}
+      API_KEY_SALT: ${API_KEY_SALT:-your-api-key-salt-change-this}
+      # APNs Configuration (for Push Notifications)
+      APNS_KEY_ID: ${APNS_KEY_ID:-}
+      APNS_TEAM_ID: ${APNS_TEAM_ID:-}
+      APNS_BUNDLE_ID: ${APNS_BUNDLE_ID:-com.yourapp.uptime}
+      APNS_KEY_PATH: ${APNS_KEY_PATH:-/app/certs/AuthKey.p8}
+      APNS_PRODUCTION: ${APNS_PRODUCTION:-false}
+      # Email Configuration (SMTP)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-Uptime Monitor <noreply@monitor.local>}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./certs:/app/certs:ro
+      - ./frontend/public:/app/frontend/public:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uptime Monitor</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- CSS Split into Component Files -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="/css/monitors.css">
+    <link rel="stylesheet" href="/css/tags.css">
+    <link rel="stylesheet" href="/css/settings.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen active">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="app-icon">🔍</div>
+                    <h1>Uptime Monitor</h1>
+                    <p>24/7 Server Monitoring Dashboard</p>
+                </div>
+
+                <div class="login-tabs">
+                    <button class="login-tab active" onclick="showLoginForm()">Sign In</button>
+                    <button class="login-tab" onclick="showRegisterForm()">Sign Up</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="login-form active">
+                    <div class="input-group">
+                        <label for="loginUsername">Username or Email</label>
+                        <input type="text" id="loginUsername" required autocomplete="username" placeholder="Enter your username or email">
+                    </div>
+                    <div class="input-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn-primary">Sign In</button>
+                    <div style="text-align: center; margin-top: 16px;">
+                        <a href="#" onclick="showForgotPasswordModal(); return false;" style="color: #007AFF; text-decoration: none; font-size: 14px;">Forgot Password?</a>
+                    </div>
+                    <div id="loginError" class="error-message"></div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="login-form">
+                    <div class="input-group">
+                        <label for="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" required autocomplete="username" placeholder="Choose a username">
+                    </div>
+                    <div class="input-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" required autocomplete="email" placeholder="your@email.com" oninput="validateEmail('registerEmail', 'emailValidationMessage')">
+                        <small id="emailValidationMessage" style="margin-top: var(--space-2); display: none;"></small>
+                        <small style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">Required for password recovery</small>
+                    </div>
+                    <div class="input-group">
+                        <label for="confirmRegisterEmail">Confirm Email</label>
+                        <input type="email" id="confirmRegisterEmail" required autocomplete="email" placeholder="Confirm your email" oninput="checkEmailMatch()">
+                        <small id="emailMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" required autocomplete="new-password" minlength="8" placeholder="At least 8 characters" oninput="validatePassword()">
+                        <small id="passwordRequirements" style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); display: block;">
+                            Must contain: 8+ characters, 1 uppercase letter, 1 number or symbol
+                        </small>
+                        <div id="passwordStrength" style="display: none; margin-top: var(--space-2);"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required autocomplete="new-password" placeholder="Confirm your password" oninput="checkPasswordMatch()">
+                        <small id="passwordMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
+                    </div>
+                    <button type="submit" class="btn-primary">Create Account</button>
+                    <div id="registerError" class="error-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="dashboard-screen">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="app-logo">
+                    <a href="#" onclick="goToHome(); return false;" style="display: flex; align-items: center; gap: var(--space-3); text-decoration: none; flex: 1;">
+                        <img src="/logo.png" alt="Uptime Logo" style="width: 24px; height: 24px; object-fit: contain;">
+                        <span class="logo-text">Uptime</span>
+                    </a>
+                    <button class="theme-toggle-btn-small" onclick="toggleTheme()" id="themeToggle" title="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" id="dashboardNavItem" class="nav-item" onclick="showView('dashboard', event); return false;" style="display: none;">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item active" onclick="showView('monitors', event); return false;">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Monitors</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showView('tags', event); return false;">
+                    <span class="nav-icon">🏷️</span>
+                    <span class="nav-text">Tags</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showView('settings', event); return false;">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <div class="user-name" id="sidebarUsername">User</div>
+                        <div class="user-role" id="sidebarUserRole">Member</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View (Admin Only) -->
+            <div id="dashboardView" class="view">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Admin Dashboard</h1>
+                        <p>Overview of all system statistics</p>
+                    </div>
+                </div>
+
+                <div class="view-content">
+                    <!-- Statistics Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6);">
+                        <!-- Monitors Stats -->
+                        <div class="content-card">
+                            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                                <div style="font-size: 40px;">📊</div>
+                                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">Monitors</h3>
+                            </div>
+                            <div style="display: grid; gap: var(--space-3);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Total Monitors</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statTotalMonitors">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Active</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700; color: #34C759;" id="statActiveMonitors">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Paused</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700; color: #FF9500;" id="statPausedMonitors">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Users Stats -->
+                        <div class="content-card">
+                            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                                <div style="font-size: 40px;">👥</div>
+                                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">Users</h3>
+                            </div>
+                            <div style="display: grid; gap: var(--space-3);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Total Users</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statTotalUsers">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Verified</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700; color: #34C759;" id="statVerifiedUsers">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Not Verified</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700; color: #FF9500;" id="statUnverifiedUsers">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags Stats -->
+                        <div class="content-card">
+                            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                                <div style="font-size: 40px;">🏷️</div>
+                                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">Tags</h3>
+                            </div>
+                            <div style="display: grid; gap: var(--space-3);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Total Tags</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statTotalTags">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monitor Status Breakdown -->
+                    <div class="content-card">
+                        <h2 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">Monitors by Status</h2>
+                        <div id="monitorStatusList" style="display: grid; gap: var(--space-3);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitors View -->
+            <div id="monitorsView" class="view active">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Monitors</h1>
+                        <p>Monitor your services in real-time</p>
+                    </div>
+                    <button class="btn-secondary" onclick="showAddMonitorModal()" style="padding: var(--space-2) var(--space-4); font-size: var(--text-sm);">
+                        ➕ New Monitor
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Monitors</div>
+                        <div class="stat-value" id="totalMonitors">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Up</div>
+                        <div class="stat-value" id="upMonitors">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Down</div>
+                        <div class="stat-value" id="downMonitors">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" id="pendingMonitors">0</div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="content-card" style="margin-bottom: 16px;">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div style="flex: 1;">
+                            <input type="text" id="monitorSearch" placeholder="🔍 Search monitors..."
+                                   style="width: 100%; padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--background); color: var(--text-primary);"
+                                   oninput="filterMonitors()">
+                        </div>
+                        <div>
+                            <select id="tagFilter" style="padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; min-width: 150px; background: var(--background); color: var(--text-primary);"
+                                    onchange="filterMonitors()">
+                                <option value="">All Tags</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="statusFilter" style="padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; min-width: 120px; background: var(--background); color: var(--text-primary);"
+                                    onchange="filterMonitors()">
+                                <option value="">All Status</option>
+                                <option value="up">Up</option>
+                                <option value="down">Down</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitors List -->
+                <div class="content-card">
+                    <div id="monitorsList" class="monitors-list">
+                        <div class="loading">Loading monitors...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags View -->
+            <div id="tagsView" class="view">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Tags</h1>
+                        <p>Organize your monitors with tags</p>
+                    </div>
+                    <button class="btn-secondary" onclick="showAddTagModal()" style="padding: var(--space-2) var(--space-4); font-size: var(--text-sm);">
+                        ➕ New Tag
+                    </button>
+                </div>
+
+                <div class="content-card">
+                    <div id="tagsList" class="tags-list">
+                        <div class="loading">Loading tags...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settingsView" class="view">
+                <div class="view-header">
+                    <div class="view-title">
+                        <h1>Settings</h1>
+                        <p>Manage your account and preferences</p>
+                    </div>
+                </div>
+
+                <!-- Settings Navigation Tabs -->
+                <div class="settings-nav">
+                    <button class="settings-tab active" onclick="showSettingsTab('account', event)">Account</button>
+                    <button class="settings-tab" onclick="showSettingsTab('api', event)">API</button>
+                    <button class="settings-tab" onclick="showSettingsTab('monitoring', event)">Monitoring</button>
+                    <button class="settings-tab" onclick="showSettingsTab('security', event)">Security</button>
+                    <button class="settings-tab" id="usersTab" onclick="showSettingsTab('users', event)" style="display: none;">Users</button>
+                    <button class="settings-tab" id="groupsTab" onclick="showSettingsTab('groups', event)" style="display: none;">Groups</button>
+                    <button class="settings-tab" id="emailTab" onclick="showSettingsTab('email', event)" style="display: none;">Email</button>
+                    <button class="settings-tab" id="apnsTab" onclick="showSettingsTab('apns', event)" style="display: none;">Push Notifications</button>
+                </div>
+
+                <!-- Account Settings Tab -->
+                <div id="accountSettings" class="settings-tab-content active">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">Account Information</h3>
+                            <div class="setting-item">
+                                <div class="setting-label">Username</div>
+                                <div class="setting-value" id="settingsUsername">-</div>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-label">Email</div>
+                                <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
+                                    <div class="setting-value" id="settingsEmail">Not set</div>
+                                    <span id="emailVerifiedBadge" style="display: none; background: #34C759; color: white; font-size: var(--text-xs); padding: 4px 8px; border-radius: var(--radius-sm);">✓ Verified</span>
+                                    <span id="emailUnverifiedBadge" style="display: none; background: #FF9500; color: white; font-size: var(--text-xs); padding: 4px 8px; border-radius: var(--radius-sm);">⚠ Unverified</span>
+                                    <button id="resendVerificationBtn" onclick="window.resendVerification()" class="btn-secondary" style="display: none; padding: 4px 12px; font-size: var(--text-xs);">Resend Verification</button>
+                                    <button onclick="window.showChangeEmailModal()" class="btn-secondary" style="padding: 4px 12px; font-size: var(--text-xs);">Change Email</button>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-label">Account Created</div>
+                                <div class="setting-value" id="settingsCreated">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">Current Session</h3>
+                            <div class="setting-item">
+                                <div class="setting-label">Logged in as</div>
+                                <div class="setting-value" id="sessionUsername">-</div>
+                            </div>
+                            <button class="btn-secondary" onclick="logout()" style="margin-top: var(--space-3);">
+                                🚪 Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Settings Tab -->
+                <div id="apiSettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">API Configuration</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                                Use this API key to connect your iOS app to this server.
+                            </p>
+                            <div class="setting-item">
+                                <div class="setting-label">API Key</div>
+                                <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
+                                    <code id="settingsApiKey" style="flex: 1; min-width: 200px; padding: var(--space-2) var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: var(--text-xs);">••••••••••••••••</code>
+                                    <button class="btn-secondary" onclick="toggleApiKeyVisibility()" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm);">👁️ Show</button>
+                                    <button class="btn-secondary" onclick="copyAPIKey()" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm);">📋 Copy</button>
+                                </div>
+                            </div>
+                            <button class="btn-danger" onclick="regenerateAPIKey()" style="margin-top: var(--space-4); padding: var(--space-2) var(--space-4); font-size: var(--text-sm);">
+                                🔄 Regenerate API Key
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitoring Settings Tab -->
+                <div id="monitoringSettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">Default Monitor Settings</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                                Configure default values for new monitors.
+                            </p>
+                            <div class="setting-item">
+                                <div class="setting-label">Default Check Interval</div>
+                                <select class="setting-input" id="defaultCheckInterval" onchange="saveMonitoringSettings()">
+                                    <option value="30">30 seconds</option>
+                                    <option value="60" selected>60 seconds</option>
+                                    <option value="120">2 minutes</option>
+                                    <option value="300">5 minutes</option>
+                                    <option value="600">10 minutes</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-label">Default Timeout</div>
+                                <select class="setting-input" id="defaultTimeout" onchange="saveMonitoringSettings()">
+                                    <option value="10">10 seconds</option>
+                                    <option value="30" selected>30 seconds</option>
+                                    <option value="60">60 seconds</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-label">Data Retention Period</div>
+                                <select class="setting-input" id="retentionPeriod" onchange="saveMonitoringSettings()">
+                                    <option value="7">7 days</option>
+                                    <option value="30" selected>30 days</option>
+                                    <option value="90">90 days</option>
+                                    <option value="365">1 year</option>
+                                </select>
+                            </div>
+                            <div style="margin-top: var(--space-4); padding: var(--space-3); background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                                <small style="color: var(--text-secondary); font-size: var(--text-xs);">
+                                    💡 These are default values used when creating new monitors. They don't affect existing monitors.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">Notifications</h3>
+                            <div class="setting-item">
+                                <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer;">
+                                    <input type="checkbox" id="notifyOnDown" checked style="width: 16px; height: 16px;" onchange="saveMonitoringSettings()">
+                                    <span style="font-size: var(--text-sm);">Notify when monitors go down</span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer;">
+                                    <input type="checkbox" id="notifyOnUp" checked style="width: 16px; height: 16px;" onchange="saveMonitoringSettings()">
+                                    <span style="font-size: var(--text-sm);">Notify when monitors come back up</span>
+                                </label>
+                            </div>
+                            <div style="margin-top: var(--space-4); padding: var(--space-3); background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                                <small style="color: var(--text-secondary); font-size: var(--text-xs);">
+                                    💡 These are default values used when creating new monitors. Existing monitors keep their notification settings.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card" style="border-color: var(--error);">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2); color: var(--error);">Danger Zone</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-4);">
+                                Delete all monitors and monitoring history. This action cannot be undone.
+                            </p>
+                            <button class="btn-danger" onclick="confirmClearAllData()">
+                                🗑️ Clear All Monitoring Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings Tab -->
+                <div id="securitySettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">Password</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                                It's recommended to change your password regularly for security.
+                            </p>
+                            <button class="btn-secondary" onclick="showChangePasswordModal()">
+                                🔑 Change Password
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="content-card" style="border-color: var(--error);">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2); color: var(--error);">Danger Zone</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-4);">
+                                Permanently delete your account and all associated data. This action cannot be undone.
+                            </p>
+                            <button class="btn-danger" onclick="confirmDeleteAccount()">
+                                🗑️ Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Settings Tab (Admin Only) -->
+                <div id="usersSettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5);">
+                                <div>
+                                    <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">User Management</h3>
+                                    <p style="color: var(--text-secondary); font-size: var(--text-sm);">
+                                        Create, edit, and manage user accounts
+                                    </p>
+                                </div>
+                                <button class="btn-secondary" onclick="showCreateUserModal()" style="padding: var(--space-2) var(--space-4); font-size: var(--text-sm);">
+                                    ➕ Create User
+                                </button>
+                            </div>
+
+                            <!-- Filter Buttons -->
+                            <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap;">
+                                <button id="filter-all" onclick="window.setStatusFilter('all')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                    All (0)
+                                </button>
+                                <button id="filter-verified" onclick="window.setStatusFilter('verified')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                    Verified (0)
+                                </button>
+                                <button id="filter-unverified" onclick="window.setStatusFilter('unverified')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                    Not Verified (0)
+                                </button>
+                                <button id="filter-invited" onclick="window.setStatusFilter('invited')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                    Invited (0)
+                                </button>
+                            </div>
+
+                            <!-- Bulk Actions -->
+                            <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap;">
+                                <button onclick="window.bulkResendVerification()" class="btn-secondary" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm);">
+                                    📧 Resend Verification to Unverified Users
+                                </button>
+                                <button onclick="window.bulkResendSetup()" class="btn-secondary" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm);">
+                                    📧 Resend Setup to Invited Users
+                                </button>
+                            </div>
+
+                            <!-- User Search -->
+                            <div style="margin-bottom: var(--space-4);">
+                                <input
+                                    type="text"
+                                    id="userSearchInput"
+                                    placeholder="🔍 Search users by name or email..."
+                                    oninput="filterUsers()"
+                                    style="width: 100%; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); background: var(--background); color: var(--text-primary);">
+                            </div>
+
+                            <div id="usersList" class="users-list">
+                                <div class="loading">Loading users...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groups Settings Tab (Admin Only) -->
+                <div id="groupsSettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5);">
+                                <div>
+                                    <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">User Groups</h3>
+                                    <p style="color: var(--text-secondary); font-size: var(--text-sm);">
+                                        Manage user groups and permissions
+                                    </p>
+                                </div>
+                                <button class="btn-secondary" onclick="showAddGroupModal()" style="padding: var(--space-2) var(--space-4); font-size: var(--text-sm);">
+                                    ➕ New Group
+                                </button>
+                            </div>
+                            <div id="groupsList" class="groups-list">
+                                <div class="loading">Loading groups...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Settings Tab (Admin Only) -->
+                <div id="emailSettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">Email Configuration</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                                Configure SMTP settings for sending email notifications
+                            </p>
+
+                            <form id="emailSettingsForm" onsubmit="saveEmailSettings(event)" style="max-width: 600px;">
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">SMTP Host *</label>
+                                    <input type="text" id="smtpHost" placeholder="smtp.example.com" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
+                                    <div>
+                                        <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">SMTP Port *</label>
+                                        <input type="number" id="smtpPort" placeholder="587" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    </div>
+                                    <div style="display: flex; align-items: flex-end;">
+                                        <label style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); cursor: pointer;">
+                                            <input type="checkbox" id="smtpSecure" style="width: 18px; height: 18px; cursor: pointer;">
+                                            <span style="font-weight: 500;">Use SSL/TLS (Port 465)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">SMTP Username *</label>
+                                    <input type="text" id="smtpUser" placeholder="your-email@example.com" required autocomplete="off" style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                </div>
+
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">SMTP Password *</label>
+                                    <input type="password" id="smtpPassword" placeholder="Leave empty to keep current password" autocomplete="new-password" style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: var(--space-1);">Password is encrypted and stored securely</p>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-5);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">From Address *</label>
+                                    <input type="text" id="smtpFrom" placeholder="Uptime Monitor <noreply@monitor.local>" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                </div>
+
+                                <div id="emailSettingsError" class="error-message"></div>
+
+                                <div style="display: flex; gap: var(--space-3);">
+                                    <button type="submit" class="btn-primary">Save Settings</button>
+                                    <button type="button" onclick="sendTestEmail()" class="btn-secondary">Send Test Email</button>
+                                </div>
+                            </form>
+
+                            <div id="emailTestResult" style="margin-top: var(--space-4); display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Apple Push Notifications Settings Tab (Admin Only) -->
+                <div id="apnsSettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">Apple Push Notifications (APNs) Configuration</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                                Configure APNs settings for sending push notifications to iOS devices
+                            </p>
+
+                            <form id="apnsSettingsForm" onsubmit="saveApnsSettings(event)" style="max-width: 600px;">
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">APNs Key Path *</label>
+                                    <input type="text" id="apnsKeyPath" placeholder="/app/certs/AuthKey.p8" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: var(--space-1);">Path to your APNs authentication key (.p8 file)</p>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">Key ID *</label>
+                                    <input type="text" id="apnsKeyId" placeholder="ABC123DEFG" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: var(--space-1);">10-character Key ID from Apple Developer</p>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">Team ID *</label>
+                                    <input type="text" id="apnsTeamId" placeholder="XYZ123HIJK" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: var(--space-1);">10-character Team ID from Apple Developer</p>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-5);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">Bundle ID *</label>
+                                    <input type="text" id="apnsBundleId" placeholder="com.yourcompany.uptime" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: var(--space-1);">Your iOS app's bundle identifier</p>
+                                </div>
+
+                                <div id="apnsSettingsError" class="error-message"></div>
+
+                                <div style="display: flex; gap: var(--space-3);">
+                                    <button type="submit" class="btn-primary">Save Settings</button>
+                                </div>
+                            </form>
+
+                            <div style="margin-top: var(--space-6); padding: var(--space-4); background: rgba(0, 122, 255, 0.1); border: 1px solid rgba(0, 122, 255, 0.3); border-radius: var(--radius-md);">
+                                <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--space-2); color: var(--primary);">📱 Setup Instructions</h4>
+                                <ol style="color: var(--text-secondary); font-size: var(--text-sm); margin: 0; padding-left: var(--space-5);">
+                                    <li style="margin-bottom: var(--space-2);">Create an APNs Key in <a href="https://developer.apple.com/account/resources/authkeys/list" target="_blank" style="color: var(--primary); text-decoration: underline;">Apple Developer Portal</a></li>
+                                    <li style="margin-bottom: var(--space-2);">Download the .p8 key file and upload it to your server</li>
+                                    <li style="margin-bottom: var(--space-2);">Enter the Key ID and Team ID from Apple Developer</li>
+                                    <li>Provide your iOS app's Bundle ID</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add/Edit Monitor Modal -->
+    <div id="monitorModal" class="modal">
+        <div class="modal-overlay" onclick="closeMonitorModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Monitor</h2>
+                <button class="modal-close" onclick="closeMonitorModal()">✕</button>
+            </div>
+            <form id="monitorForm" class="modal-body">
+                <input type="hidden" id="monitorId">
+
+                <div class="input-group">
+                    <label for="monitorName">Monitor Name *</label>
+                    <input type="text" id="monitorName" required placeholder="My Website">
+                </div>
+
+                <div class="input-group">
+                    <label for="monitorType">Monitor Type *</label>
+                    <select id="monitorType" required onchange="updateMonitorFields()">
+                        <option value="http">HTTP</option>
+                        <option value="https">HTTPS</option>
+                        <option value="ping">Ping</option>
+                        <option value="tcp">TCP Port</option>
+                        <option value="dns">DNS</option>
+                    </select>
+                </div>
+
+                <div id="httpFields" class="conditional-fields">
+                    <div class="input-group">
+                        <label for="monitorUrl">URL *</label>
+                        <input type="url" id="monitorUrl" placeholder="https://example.com">
+                    </div>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="monitorMethod">HTTP Method</label>
+                            <select id="monitorMethod">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="HEAD">HEAD</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="acceptedStatusCodes">Accepted Status Codes</label>
+                            <input type="text" id="acceptedStatusCodes" placeholder="200, 201-299" value="200">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hostFields" class="conditional-fields" style="display:none;">
+                    <div class="input-group">
+                        <label for="monitorHostname">Hostname/IP *</label>
+                        <input type="text" id="monitorHostname" placeholder="example.com or 1.2.3.4">
+                    </div>
+                </div>
+
+                <div id="tcpFields" class="conditional-fields" style="display:none;">
+                    <div class="input-group">
+                        <label for="monitorPort">Port *</label>
+                        <input type="number" id="monitorPort" min="1" max="65535" placeholder="80">
+                    </div>
+                </div>
+
+                <div id="dnsFields" class="conditional-fields" style="display:none;">
+                    <div class="input-group">
+                        <label for="dnsRecordType">Record Type</label>
+                        <select id="dnsRecordType">
+                            <option value="A">A</option>
+                            <option value="AAAA">AAAA</option>
+                            <option value="CNAME">CNAME</option>
+                            <option value="MX">MX</option>
+                            <option value="TXT">TXT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="checkInterval">Check Interval (seconds)</label>
+                        <input type="number" id="checkInterval" min="10" value="60">
+                    </div>
+                    <div class="input-group">
+                        <label for="timeout">Timeout (seconds)</label>
+                        <input type="number" id="timeout" min="1" value="30">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="monitorTags">Tags (Optional)</label>
+                    <div id="monitorTags" class="tags-selector">
+                        <!-- Tags will be populated dynamically -->
+                    </div>
+                    <small class="input-hint">Select tags to organize this monitor</small>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="notifyOnDownModal" checked>
+                        <span>Notify when monitor goes down</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="notifyOnUpModal" checked>
+                        <span>Notify when monitor comes back up</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="monitorActive" checked>
+                        <span>Monitor is active</span>
+                    </label>
+                </div>
+
+                <div id="monitorFormError" class="error-message"></div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeMonitorModal()">Cancel</button>
+                <button type="submit" form="monitorForm" class="btn-primary">Save Monitor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Tag Modal -->
+    <div id="tagModal" class="modal">
+        <div class="modal-overlay" onclick="closeTagModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2 id="tagModalTitle">Add Tag</h2>
+                <button class="modal-close" onclick="closeTagModal()">✕</button>
+            </div>
+            <form id="tagForm" class="modal-body">
+                <input type="hidden" id="tagId">
+
+                <div class="input-group">
+                    <label for="tagName">Tag Name *</label>
+                    <input type="text" id="tagName" required placeholder="Production">
+                </div>
+
+                <div class="input-group">
+                    <label for="tagColor">Color</label>
+                    <div class="color-picker">
+                        <input type="color" id="tagColor" value="#3B82F6">
+                        <input type="text" id="tagColorText" value="#3B82F6" placeholder="#3B82F6">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="tagSymbol">Symbol</label>
+                    <div id="symbolPicker" class="symbol-picker"></div>
+                    <input type="hidden" id="tagSymbol" value="tag.fill">
+                </div>
+
+                <div id="tagFormError" class="error-message"></div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeTagModal()">Cancel</button>
+                <button type="submit" form="tagForm" class="btn-primary">Save Tag</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2 id="deleteModalTitle">Confirm Delete</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteModalMessage">Are you sure you want to delete this item?</p>
+                <p class="warning-text">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-overlay" onclick="closeForgotPasswordModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button class="modal-close" onclick="closeForgotPasswordModal()">✕</button>
+            </div>
+            <form id="forgotPasswordForm" class="modal-body">
+                <p>Enter your username or email address and we'll send you a link to reset your password.</p>
+                <div class="input-group">
+                    <label for="forgotIdentifier">Username or Email</label>
+                    <input type="text" id="forgotIdentifier" required placeholder="Enter your username or email">
+                </div>
+                <div id="forgotPasswordError" class="error-message"></div>
+                <div id="forgotPasswordSuccess" style="display: none; padding: 12px; background: rgba(52, 199, 89, 0.1); border: 1px solid #34C759; border-radius: 8px; color: #34C759; font-size: 14px; margin-top: 12px;"></div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeForgotPasswordModal()">Cancel</button>
+                <button type="submit" form="forgotPasswordForm" class="btn-primary">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal (shown when user clicks link from email) -->
+    <div id="resetPasswordModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2>Set New Password</h2>
+            </div>
+            <form id="resetPasswordForm" class="modal-body">
+                <input type="hidden" id="resetToken">
+                <div class="input-group">
+                    <label for="resetNewPassword">New Password</label>
+                    <input type="password" id="resetNewPassword" required minlength="8" placeholder="At least 8 characters, 1 uppercase, 1 number/symbol" oninput="validateResetPassword()">
+                    <small id="resetPasswordRequirements" style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); display: block;">
+                        Must contain: 8+ characters, 1 uppercase letter, 1 number or symbol
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="resetConfirmPassword">Confirm New Password</label>
+                    <input type="password" id="resetConfirmPassword" required minlength="8" placeholder="Confirm your password" oninput="checkResetPasswordMatch()">
+                    <small id="resetPasswordMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
+                </div>
+                <div id="resetPasswordError" class="error-message"></div>
+                <div id="resetPasswordSuccess" class="success-message"></div>
+            </form>
+            <div class="modal-footer">
+                <button type="submit" form="resetPasswordForm" class="btn-primary">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Force Password Change Modal -->
+    <div id="forcePasswordChangeModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2>⚠️ Account Update Required</h2>
+            </div>
+            <form id="forcePasswordChangeForm" class="modal-body">
+                <p id="forceChangeMessage" style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                    For security reasons, you must update your account information before continuing.
+                </p>
+                <div class="input-group" id="forceUsernameGroup" style="display: none;">
+                    <label for="forceNewUsername">New Username</label>
+                    <input type="text" id="forceNewUsername" placeholder="Choose a secure username" minlength="3">
+                    <small style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); display: block;">
+                        For security, please change from the default "admin" username
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="forceNewEmail">Email Address</label>
+                    <input type="email" id="forceNewEmail" required placeholder="your@email.com">
+                    <small style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); display: block;">
+                        Please provide a valid email address
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="forceCurrentPassword">Current Password</label>
+                    <input type="password" id="forceCurrentPassword" required placeholder="Enter current password">
+                </div>
+                <div class="input-group">
+                    <label for="forceNewPassword">New Password</label>
+                    <input type="password" id="forceNewPassword" required minlength="8" placeholder="At least 8 characters" oninput="validateForceNewPassword()">
+                    <small id="forcePasswordRequirements" style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); display: block;">
+                        Must contain: 8+ characters, 1 uppercase letter, 1 number or symbol
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="forceConfirmPassword">Confirm New Password</label>
+                    <input type="password" id="forceConfirmPassword" required placeholder="Confirm your new password" oninput="checkForcePasswordMatch()">
+                    <small id="forcePasswordMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
+                </div>
+                <div id="forcePasswordChangeError" class="error-message"></div>
+            </form>
+            <div class="modal-footer">
+                <button type="submit" form="forcePasswordChangeForm" class="btn-primary">Update Account Information</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-overlay" onclick="closeChangePasswordModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" onclick="closeChangePasswordModal()">✕</button>
+            </div>
+            <form id="changePasswordForm" class="modal-body">
+                <div class="input-group">
+                    <label for="currentPasswordChange">Current Password</label>
+                    <input type="password" id="currentPasswordChange" required placeholder="Enter your current password">
+                </div>
+                <div class="input-group">
+                    <label for="newPasswordChange">New Password</label>
+                    <input type="password" id="newPasswordChange" required minlength="8" placeholder="At least 8 characters, 1 uppercase, 1 number/symbol" oninput="validateChangePassword()">
+                    <small id="changePasswordRequirements" style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); display: block;">
+                        Must contain: 8+ characters, 1 uppercase letter, 1 number or symbol
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="confirmPasswordChange">Confirm New Password</label>
+                    <input type="password" id="confirmPasswordChange" required minlength="8" placeholder="Confirm your new password" oninput="checkChangePasswordMatch()">
+                    <small id="changePasswordMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
+                </div>
+                <div id="changePasswordError" class="error-message"></div>
+                <div id="changePasswordSuccess" class="success-message"></div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                <button type="submit" form="changePasswordForm" class="btn-primary">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Immediate function definitions for critical UI interactions -->
+    <script>
+        console.log('Inline script loaded');
+
+        // These ensure form switching works immediately
+        window.showLoginForm = window.showLoginForm || function() {
+            document.querySelectorAll('.login-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.login-tab')[0].classList.add('active');
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('registerForm').classList.remove('active');
+        };
+
+        window.showRegisterForm = window.showRegisterForm || function() {
+            document.querySelectorAll('.login-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.login-tab')[1].classList.add('active');
+            document.getElementById('registerForm').classList.add('active');
+            document.getElementById('loginForm').classList.remove('active');
+        };
+
+        window.showForgotPasswordModal = window.showForgotPasswordModal || function() {
+            document.getElementById('forgotPasswordModal').classList.add('active');
+        };
+
+        // Debug: Check if module loads after 2 seconds
+        setTimeout(function() {
+            if (!window.handleLogin) {
+                console.error('ERROR: Module not loaded! handleLogin is undefined');
+                console.error('Please check browser console for module loading errors');
+                alert('JavaScript module failed to load. Please check browser console (F12) for errors.');
+            } else {
+                console.log('SUCCESS: Module loaded correctly');
+            }
+        }, 2000);
+    </script>
+
+    <!-- Main application (ES6 modules) -->
+    <script type="module" src="/js/main.js" onerror="console.error('Failed to load main.js module')"></script>
+    <!-- Fallback for browsers without module support -->
+    <script nomodule src="/js/app.js"></script>
+</body>
+</html>

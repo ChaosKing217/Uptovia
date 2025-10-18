@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Up Your Account - Uptime Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 480px;
+            width: 100%;
+            padding: 48px 32px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            color: #1d1d1f;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #86868b;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .username-display {
+            background: #f5f5f7;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .username-label {
+            color: #86868b;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .username-value {
+            color: #1d1d1f;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #1d1d1f;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e5ea;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+
+        input.invalid {
+            border-color: #FF3B30;
+        }
+
+        input.valid {
+            border-color: #34C759;
+        }
+
+        .validation-message {
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .validation-message.error {
+            color: #FF3B30;
+            display: block;
+        }
+
+        .validation-message.success {
+            color: #34C759;
+            display: block;
+        }
+
+        .password-requirements {
+            background: #f5f5f7;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .password-requirements h4 {
+            font-size: 14px;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .requirement {
+            font-size: 13px;
+            color: #86868b;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .requirement.met {
+            color: #34C759;
+        }
+
+        .requirement::before {
+            content: '○';
+            font-size: 12px;
+        }
+
+        .requirement.met::before {
+            content: '✓';
+            font-weight: 600;
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px 32px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 24px;
+        }
+
+        .button:hover:not(:disabled) {
+            background: #0051D5;
+        }
+
+        .button:disabled {
+            background: #86868b;
+            cursor: not-allowed;
+        }
+
+        .error-box {
+            background: #FFEBEE;
+            border-left: 4px solid #FF3B30;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-box.show {
+            display: block;
+        }
+
+        .error-box p {
+            color: #FF3B30;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007AFF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loadingScreen" class="loading">
+            <div class="spinner"></div>
+            <p style="color: #86868b; margin-top: 16px;">Loading...</p>
+        </div>
+
+        <div id="setupForm" style="display: none;">
+            <div class="header">
+                <div class="icon">🔍</div>
+                <h1>Set Up Your Account</h1>
+                <p class="subtitle">Complete your account setup by verifying your email and creating a password</p>
+            </div>
+
+            <div class="username-display">
+                <div class="username-label">Your username</div>
+                <div class="username-value" id="username"></div>
+            </div>
+
+            <div class="error-box" id="errorBox">
+                <p id="errorMessage"></p>
+            </div>
+
+            <form id="accountSetupForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email address" required>
+                    <div class="validation-message" id="emailValidation"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required>
+                    <div class="password-requirements">
+                        <h4>Password requirements:</h4>
+                        <div class="requirement" id="req-length">At least 8 characters</div>
+                        <div class="requirement" id="req-uppercase">At least one uppercase letter</div>
+                        <div class="requirement" id="req-special">At least one number or symbol</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                    <div class="validation-message" id="confirmPasswordValidation"></div>
+                </div>
+
+                <button type="submit" class="button" id="submitButton" disabled>Set Up Account</button>
+            </form>
+        </div>
+
+        <div id="errorScreen" style="display: none; text-align: center;">
+            <div class="icon">❌</div>
+            <h1>Invalid or Expired Link</h1>
+            <p class="subtitle">This setup link is invalid or has expired. Please contact your administrator for a new invitation.</p>
+            <a href="/" class="button" style="display: inline-block; text-decoration: none; margin-top: 24px;">Go to Login</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const submitButton = document.getElementById('submitButton');
+        const form = document.getElementById('accountSetupForm');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let userData = null;
+
+        // Load user data from token
+        async function loadUserData() {
+            if (!token) {
+                showErrorScreen();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/auth/setup-account?token=${token}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showErrorScreen();
+                    return;
+                }
+
+                userData = data;
+                document.getElementById('username').textContent = data.username;
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('setupForm').style.display = 'block';
+            } catch (error) {
+                showErrorScreen();
+            }
+        }
+
+        function showErrorScreen() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('errorScreen').style.display = 'block';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.classList.add('show');
+        }
+
+        function hideError() {
+            errorBox.classList.remove('show');
+        }
+
+        // Email validation
+        emailInput.addEventListener('input', function() {
+            const email = this.value;
+            const emailValidation = document.getElementById('emailValidation');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!email) {
+                this.classList.remove('valid', 'invalid');
+                emailValidation.textContent = '';
+                emailValidation.className = 'validation-message';
+            } else if (!emailRegex.test(email)) {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+                emailValidation.textContent = 'Please enter a valid email address';
+                emailValidation.className = 'validation-message error';
+            } else if (userData && email !== userData.email) {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+                emailValidation.textContent = 'Email must match the invitation email';
+                emailValidation.className = 'validation-message error';
+            } else {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+                emailValidation.textContent = 'Email is valid';
+                emailValidation.className = 'validation-message success';
+            }
+
+            checkFormValidity();
+        });
+
+        // Password validation
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+
+            // Check requirements
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasSpecial = /[\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+            // Update requirement indicators
+            document.getElementById('req-length').classList.toggle('met', hasLength);
+            document.getElementById('req-uppercase').classList.toggle('met', hasUppercase);
+            document.getElementById('req-special').classList.toggle('met', hasSpecial);
+
+            // Update input styling
+            if (password && hasLength && hasUppercase && hasSpecial) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+            } else if (password) {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            } else {
+                this.classList.remove('valid', 'invalid');
+            }
+
+            // Also validate confirm password if it has a value
+            if (confirmPasswordInput.value) {
+                confirmPasswordInput.dispatchEvent(new Event('input'));
+            }
+
+            checkFormValidity();
+        });
+
+        // Confirm password validation
+        confirmPasswordInput.addEventListener('input', function() {
+            const confirmPasswordValidation = document.getElementById('confirmPasswordValidation');
+
+            if (!this.value) {
+                this.classList.remove('valid', 'invalid');
+                confirmPasswordValidation.textContent = '';
+                confirmPasswordValidation.className = 'validation-message';
+            } else if (this.value !== passwordInput.value) {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+                confirmPasswordValidation.textContent = 'Passwords do not match';
+                confirmPasswordValidation.className = 'validation-message error';
+            } else {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+                confirmPasswordValidation.textContent = 'Passwords match';
+                confirmPasswordValidation.className = 'validation-message success';
+            }
+
+            checkFormValidity();
+        });
+
+        function checkFormValidity() {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            const isEmailValid = emailRegex.test(email) && userData && email === userData.email;
+            const isPasswordValid = password.length >= 8 && /[A-Z]/.test(password) && /[\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            const isConfirmValid = confirmPassword === password;
+
+            submitButton.disabled = !(isEmailValid && isPasswordValid && isConfirmValid);
+        }
+
+        // Form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideError();
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Setting up...';
+
+            try {
+                const response = await fetch('/api/auth/setup-account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token,
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || 'Failed to set up account');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Set Up Account';
+                    return;
+                }
+
+                // Success - redirect to login
+                window.location.href = '/?setup=success';
+            } catch (error) {
+                showError('An error occurred. Please try again.');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Set Up Account';
+            }
+        });
+
+        // Load user data on page load
+        loadUserData();
+    </script>
+</body>
+</html>
