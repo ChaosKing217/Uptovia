@@ -43,12 +43,13 @@ export async function loadSettings() {
             resendBtn.style.display = 'none';
         }
 
-        // Show Users, Groups, Email, and APNS tabs if user is admin
+        // Show Users, Groups, Email, APNS, and Turnstile tabs if user is admin
         if (user.is_admin) {
             document.getElementById('usersTab').style.display = 'block';
             document.getElementById('groupsTab').style.display = 'block';
             document.getElementById('emailTab').style.display = 'block';
             document.getElementById('apnsTab').style.display = 'block';
+            document.getElementById('turnstileTab').style.display = 'block';
         }
 
         // Load monitoring settings
@@ -92,6 +93,8 @@ export function showSettingsTab(tabName, e) {
         loadEmailSettings();
     } else if (tabName === 'apns') {
         loadApnsSettings();
+    } else if (tabName === 'turnstile') {
+        loadTurnstileSettings();
     }
 }
 
@@ -598,6 +601,208 @@ export async function handleChangeEmail(e) {
 
         // Reload settings to update the UI
         loadSettings();
+    } catch (error) {
+        errorDiv.textContent = error.message;
+    }
+}
+
+// ============================================
+// USERNAME CHANGE
+// ============================================
+export function showChangeUsernameModal() {
+    const user = getCurrentUser();
+    document.getElementById('currentUsernameDisplay').textContent = user.username;
+    document.getElementById('verifyCurrentUsername').value = '';
+    document.getElementById('newUsername').value = '';
+    document.getElementById('confirmNewUsername').value = '';
+    document.getElementById('passwordForUsername').value = '';
+    document.getElementById('confirmPasswordForUsername').value = '';
+    document.getElementById('changeUsernameError').textContent = '';
+    document.getElementById('changeUsernameSuccess').textContent = '';
+    document.getElementById('changeUsernameModal').classList.add('active');
+
+    // Setup form submission
+    const form = document.getElementById('changeUsernameForm');
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        handleChangeUsername();
+    };
+}
+
+export function closeChangeUsernameModal() {
+    document.getElementById('changeUsernameModal').classList.remove('active');
+}
+
+export function validateNewUsername() {
+    const newUsername = document.getElementById('newUsername').value;
+    const requirementsDiv = document.getElementById('newUsernameRequirements');
+
+    if (newUsername.length < 3) {
+        requirementsDiv.style.color = '#FF3B30';
+        requirementsDiv.textContent = '❌ Username must be at least 3 characters';
+        return false;
+    } else {
+        requirementsDiv.style.color = '#34C759';
+        requirementsDiv.textContent = '✓ Username length is valid';
+        return true;
+    }
+}
+
+export function checkUsernameMatch() {
+    const newUsername = document.getElementById('newUsername').value;
+    const confirmUsername = document.getElementById('confirmNewUsername').value;
+    const matchMessage = document.getElementById('usernameMatchMessage');
+
+    if (confirmUsername.length === 0) {
+        matchMessage.style.display = 'none';
+        return false;
+    }
+
+    if (newUsername !== confirmUsername) {
+        matchMessage.style.display = 'block';
+        matchMessage.style.color = '#FF3B30';
+        matchMessage.textContent = '❌ Usernames do not match';
+        return false;
+    } else {
+        matchMessage.style.display = 'block';
+        matchMessage.style.color = '#34C759';
+        matchMessage.textContent = '✓ Usernames match';
+        return true;
+    }
+}
+
+export function checkPasswordForUsernameMatch() {
+    const password = document.getElementById('passwordForUsername').value;
+    const confirmPassword = document.getElementById('confirmPasswordForUsername').value;
+    const matchMessage = document.getElementById('passwordForUsernameMatchMessage');
+
+    if (confirmPassword.length === 0) {
+        matchMessage.style.display = 'none';
+        return false;
+    }
+
+    if (password !== confirmPassword) {
+        matchMessage.style.display = 'block';
+        matchMessage.style.color = '#FF3B30';
+        matchMessage.textContent = '❌ Passwords do not match';
+        return false;
+    } else {
+        matchMessage.style.display = 'block';
+        matchMessage.style.color = '#34C759';
+        matchMessage.textContent = '✓ Passwords match';
+        return true;
+    }
+}
+
+export async function handleChangeUsername() {
+    const errorDiv = document.getElementById('changeUsernameError');
+    errorDiv.textContent = '';
+
+    const user = getCurrentUser();
+    const verifyUsername = document.getElementById('verifyCurrentUsername').value;
+    const newUsername = document.getElementById('newUsername').value;
+    const confirmUsername = document.getElementById('confirmNewUsername').value;
+    const password = document.getElementById('passwordForUsername').value;
+    const confirmPassword = document.getElementById('confirmPasswordForUsername').value;
+
+    // Validate current username
+    if (verifyUsername !== user.username) {
+        errorDiv.textContent = 'Current username verification failed. Please type your current username exactly.';
+        return;
+    }
+
+    // Validate new username
+    if (newUsername.length < 3) {
+        errorDiv.textContent = 'New username must be at least 3 characters long';
+        return;
+    }
+
+    if (newUsername === user.username) {
+        errorDiv.textContent = 'New username must be different from your current username';
+        return;
+    }
+
+    // Check if usernames match
+    if (newUsername !== confirmUsername) {
+        errorDiv.textContent = 'New usernames do not match';
+        return;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match';
+        return;
+    }
+
+    if (!password) {
+        errorDiv.textContent = 'Password is required';
+        return;
+    }
+
+    try {
+        await apiRequest('/auth/change-username', {
+            method: 'POST',
+            body: JSON.stringify({
+                currentUsername: verifyUsername,
+                newUsername,
+                password
+            })
+        });
+
+        showToast('Username Changed', 'Your username has been changed successfully. Please log in again with your new username.', 'success');
+
+        // Close modal and log out user after brief delay
+        setTimeout(() => {
+            closeChangeUsernameModal();
+            window.logout();
+        }, 2000);
+    } catch (error) {
+        errorDiv.textContent = error.message;
+    }
+}
+
+// ============================================
+// TURNSTILE SETTINGS
+// ============================================
+export async function loadTurnstileSettings() {
+    try {
+        const data = await apiRequest('/settings/turnstile');
+
+        document.getElementById('turnstileEnabled').checked = data.is_enabled || false;
+        document.getElementById('turnstileSiteKey').value = data.site_key || '';
+        document.getElementById('turnstileSecretKey').value = data.secret_key || '';
+    } catch (error) {
+        console.error('Failed to load Turnstile settings:', error);
+        showToast('Load Failed', 'Failed to load Turnstile settings', 'error');
+    }
+}
+
+export async function saveTurnstileSettings(e) {
+    e.preventDefault();
+    const errorDiv = document.getElementById('turnstileSettingsError');
+    errorDiv.textContent = '';
+
+    const isEnabled = document.getElementById('turnstileEnabled').checked;
+    const siteKey = document.getElementById('turnstileSiteKey').value.trim();
+    const secretKey = document.getElementById('turnstileSecretKey').value.trim();
+
+    // If enabled, validate that keys are provided
+    if (isEnabled && (!siteKey || !secretKey)) {
+        errorDiv.textContent = 'Site Key and Secret Key are required when Turnstile is enabled';
+        return;
+    }
+
+    try {
+        await apiRequest('/settings/turnstile', {
+            method: 'POST',
+            body: JSON.stringify({
+                isEnabled,
+                siteKey,
+                secretKey
+            })
+        });
+
+        showToast('Settings Saved', 'Turnstile settings have been updated successfully', 'success');
     } catch (error) {
         errorDiv.textContent = error.message;
     }

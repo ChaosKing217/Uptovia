@@ -7,6 +7,87 @@ import { setCurrentUser, setAuthToken, getCurrentUser, getAuthToken } from './st
 import { showToast } from './ui.js';
 
 // ============================================
+// TURNSTILE CONFIGURATION
+// ============================================
+let turnstileConfig = { enabled: false, siteKey: null };
+let loginTurnstileWidgetId = null;
+let registerTurnstileWidgetId = null;
+
+// Load Turnstile configuration
+export async function loadTurnstileConfig() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/turnstile/public`);
+        const data = await response.json();
+        turnstileConfig = data;
+
+        // Show/hide Turnstile widgets based on configuration
+        if (turnstileConfig.enabled && turnstileConfig.siteKey) {
+            document.getElementById('loginTurnstile').style.display = 'block';
+            document.getElementById('registerTurnstile').style.display = 'block';
+            initializeTurnstile();
+        } else {
+            document.getElementById('loginTurnstile').style.display = 'none';
+            document.getElementById('registerTurnstile').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Failed to load Turnstile config:', error);
+        turnstileConfig = { enabled: false, siteKey: null };
+    }
+}
+
+// Initialize Turnstile widgets
+function initializeTurnstile() {
+    if (!turnstileConfig.enabled || !turnstileConfig.siteKey) return;
+
+    // Wait for Turnstile API to load
+    const checkTurnstile = setInterval(() => {
+        if (window.turnstile) {
+            clearInterval(checkTurnstile);
+
+            // Render login Turnstile
+            const loginContainer = document.getElementById('loginTurnstile');
+            if (loginContainer && !loginTurnstileWidgetId) {
+                loginContainer.innerHTML = ''; // Clear any existing content
+                loginTurnstileWidgetId = window.turnstile.render('#loginTurnstile', {
+                    sitekey: turnstileConfig.siteKey,
+                    theme: 'light',
+                    size: 'normal'
+                });
+            }
+
+            // Render register Turnstile
+            const registerContainer = document.getElementById('registerTurnstile');
+            if (registerContainer && !registerTurnstileWidgetId) {
+                registerContainer.innerHTML = ''; // Clear any existing content
+                registerTurnstileWidgetId = window.turnstile.render('#registerTurnstile', {
+                    sitekey: turnstileConfig.siteKey,
+                    theme: 'light',
+                    size: 'normal'
+                });
+            }
+        }
+    }, 100);
+
+    // Stop checking after 10 seconds
+    setTimeout(() => clearInterval(checkTurnstile), 10000);
+}
+
+// Get Turnstile token
+function getTurnstileToken(widgetId) {
+    if (!turnstileConfig.enabled || !window.turnstile || !widgetId) {
+        return null;
+    }
+    return window.turnstile.getResponse(widgetId);
+}
+
+// Reset Turnstile widget
+function resetTurnstile(widgetId) {
+    if (window.turnstile && widgetId) {
+        window.turnstile.reset(widgetId);
+    }
+}
+
+// ============================================
 // AUTH SCREEN SWITCHING
 // ============================================
 export function showLoginForm() {
@@ -33,15 +114,20 @@ export async function handleLogin(e) {
     const errorDiv = document.getElementById('loginError');
 
     try {
+        // Get Turnstile token if enabled
+        const turnstileToken = getTurnstileToken(loginTurnstileWidgetId);
+
         const response = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, turnstileToken })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
+            // Reset Turnstile widget on error
+            resetTurnstile(loginTurnstileWidgetId);
             throw new Error(data.error || 'Login failed');
         }
 
@@ -61,6 +147,8 @@ export async function handleLogin(e) {
         }
     } catch (error) {
         errorDiv.textContent = error.message;
+        // Reset Turnstile widget on error
+        resetTurnstile(loginTurnstileWidgetId);
     }
 }
 
@@ -104,7 +192,10 @@ export async function handleRegister(e) {
     }
 
     try {
-        const requestBody = { username, password, email };
+        // Get Turnstile token if enabled
+        const turnstileToken = getTurnstileToken(registerTurnstileWidgetId);
+
+        const requestBody = { username, password, email, turnstileToken };
 
         const response = await fetch(`${API_BASE}/auth/register`, {
             method: 'POST',
@@ -115,6 +206,8 @@ export async function handleRegister(e) {
         const data = await response.json();
 
         if (!response.ok) {
+            // Reset Turnstile widget on error
+            resetTurnstile(registerTurnstileWidgetId);
             throw new Error(data.error || 'Registration failed');
         }
 
@@ -132,6 +225,8 @@ export async function handleRegister(e) {
         showDashboard();
     } catch (error) {
         errorDiv.textContent = error.message;
+        // Reset Turnstile widget on error
+        resetTurnstile(registerTurnstileWidgetId);
     }
 }
 

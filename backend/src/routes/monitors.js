@@ -4,6 +4,51 @@ const { verifyAPIKey, verifyToken } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Helper function to get user's subscription plan limits
+async function getUserPlanLimits(userId) {
+    try {
+        // Check if user is admin (admins have no limits)
+        const adminCheck = await db.query(
+            'SELECT is_admin FROM users WHERE id = $1',
+            [userId]
+        );
+
+        if (adminCheck.rows.length > 0 && adminCheck.rows[0].is_admin) {
+            return { maxMonitors: -1, maxTags: -1, planName: 'Admin' };
+        }
+
+        // Get user's subscription plan (Free Plan: id 2, Starter Plan: id 3, Pro Plan: id 4)
+        const planResult = await db.query(
+            `SELECT group_id FROM user_groups
+             WHERE user_id = $1 AND group_id IN (2, 3, 4)
+             ORDER BY group_id DESC LIMIT 1`,
+            [userId]
+        );
+
+        if (planResult.rows.length === 0) {
+            // Default to Free Plan if no subscription found
+            return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
+        }
+
+        const groupId = planResult.rows[0].group_id;
+
+        // Return limits based on plan
+        switch (groupId) {
+            case 2: // Free Plan
+                return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
+            case 3: // Starter Plan
+                return { maxMonitors: 10, maxTags: 5, planName: 'Starter Plan' };
+            case 4: // Pro Plan
+                return { maxMonitors: -1, maxTags: -1, planName: 'Pro Plan' }; // -1 = unlimited
+            default:
+                return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
+        }
+    } catch (error) {
+        console.error('Error getting plan limits:', error);
+        return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
+    }
+}
+
 // Support both API key and JWT authentication
 const authenticate = (req, res, next) => {
     const apiKey = req.headers['x-api-key'];
@@ -110,6 +155,25 @@ router.post('/', async (req, res) => {
 
         if (!name || !type) {
             return res.status(400).json({ error: 'Name and type are required' });
+        }
+
+        // Check subscription limits before creating monitor
+        const limits = await getUserPlanLimits(req.userId);
+
+        // Count existing monitors for this user
+        const countResult = await db.query(
+            'SELECT COUNT(*) as count FROM monitors WHERE user_id = $1',
+            [req.userId]
+        );
+        const currentMonitorCount = parseInt(countResult.rows[0].count);
+
+        // Check if user has reached their limit (unlimited = -1)
+        if (limits.maxMonitors !== -1 && currentMonitorCount >= limits.maxMonitors) {
+            return res.status(403).json({
+                error: `Monitor limit reached. Your ${limits.planName} allows a maximum of ${limits.maxMonitors} monitors.`,
+                limit: limits.maxMonitors,
+                current: currentMonitorCount
+            });
         }
 
         // If groupId is provided, check user has access

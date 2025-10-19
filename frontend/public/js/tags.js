@@ -3,7 +3,7 @@
 // ============================================
 
 import { apiRequest } from './api.js';
-import { getTags, setTags, getCurrentView } from './state.js';
+import { getTags, setTags, getCurrentView, getCurrentUser } from './state.js';
 import { showToast, escapeHtml } from './ui.js';
 
 // Symbol map for tag icons
@@ -114,6 +114,13 @@ export function selectSymbol(symbol) {
 // TAG CRUD
 // ============================================
 export function showAddTagModal() {
+    // Check if user's email is verified
+    const user = getCurrentUser();
+    if (!user.email_verified && !user.is_admin) {
+        showToast('Email Not Verified', 'Please verify your email address before creating tags.', 'error');
+        return;
+    }
+
     document.getElementById('tagModalTitle').textContent = 'Add Tag';
     document.getElementById('tagId').value = '';
     document.getElementById('tagForm').reset();

@@ -171,6 +171,16 @@ CREATE TABLE IF NOT EXISTS apns_settings (
     updated_by INTEGER REFERENCES users(id)
 );
 
+-- Cloudflare Turnstile settings table
+CREATE TABLE IF NOT EXISTS turnstile_settings (
+    id SERIAL PRIMARY KEY,
+    site_key VARCHAR(500),
+    secret_key VARCHAR(500),
+    is_enabled BOOLEAN DEFAULT false,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER REFERENCES users(id)
+);
+
 -- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_monitors_user_id ON monitors(user_id);
 CREATE INDEX IF NOT EXISTS idx_monitors_group_id ON monitors(group_id);
@@ -186,11 +196,13 @@ CREATE INDEX IF NOT EXISTS idx_monitor_tags_monitor_id ON monitor_tags(monitor_i
 CREATE INDEX IF NOT EXISTS idx_monitor_tags_tag_id ON monitor_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_monitoring_settings_user_id ON monitoring_settings(user_id);
 
--- Create default groups
+-- Create default groups (Admin and Subscription Plans)
 INSERT INTO groups (id, name, description, created_by)
 VALUES
     (1, 'Admin', 'Administrator group with full access', NULL),
-    (2, 'Member', 'Default member group for regular users', NULL)
+    (2, 'Free Plan', 'Free subscription plan - Max 5 monitors, 2 tags', NULL),
+    (3, 'Starter Plan', 'Starter subscription plan - Max 10 monitors, 5 tags', NULL),
+    (4, 'Pro Plan', 'Professional subscription plan - Unlimited monitors and tags', NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- Set sequence for groups id to start after default groups
@@ -207,11 +219,17 @@ INSERT INTO users (username, email, password_hash, api_key, is_admin, force_pass
 VALUES ('admin', 'admin@example.com', '$2a$10$ZhRLu.K0ov4Y7k5mHIz9PO6uiLHHQj6y.6dO9QxqAjXO/IxiatCdC', 'default-api-key-change-this-immediately', true, true, true, true)
 ON CONFLICT (username) DO NOTHING;
 
--- Assign admin user to Admin group as owner
+-- Assign admin user to Admin group as owner and Pro Plan
 INSERT INTO user_groups (user_id, group_id, role)
 SELECT id, 1, 'owner' FROM users WHERE username = 'admin'
+UNION ALL
+SELECT id, 4, 'member' FROM users WHERE username = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- Insert default email settings
 INSERT INTO email_settings (is_configured) VALUES (false)
+ON CONFLICT DO NOTHING;
+
+-- Insert default Turnstile settings
+INSERT INTO turnstile_settings (is_enabled) VALUES (false)
 ON CONFLICT DO NOTHING;

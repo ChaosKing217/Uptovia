@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uptime Monitor</title>
+    <title>Uptovia</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- CSS Split into Component Files -->
     <link rel="stylesheet" href="/css/variables.css">
@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="/css/monitors.css">
     <link rel="stylesheet" href="/css/tags.css">
     <link rel="stylesheet" href="/css/settings.css">
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
     <!-- Login Screen -->
@@ -22,7 +24,7 @@
             <div class="login-card">
                 <div class="login-header">
                     <img src="/logo.png" alt="Uptime Logo" class="app-icon">
-                    <h1>Uptime Monitor</h1>
+                    <h1>Uptovia</h1>
                     <p>24/7 Server Monitoring Dashboard</p>
                 </div>
 
@@ -41,6 +43,8 @@
                         <label for="loginPassword">Password</label>
                         <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="Enter your password">
                     </div>
+                    <!-- Turnstile Widget for Login -->
+                    <div id="loginTurnstile" class="cf-turnstile" style="margin-bottom: 16px; display: none;"></div>
                     <button type="submit" class="btn-primary">Sign In</button>
                     <div style="text-align: center; margin-top: 16px;">
                         <a href="#" onclick="showForgotPasswordModal(); return false;" style="color: #007AFF; text-decoration: none; font-size: 14px;">Forgot Password?</a>
@@ -78,6 +82,8 @@
                         <input type="password" id="confirmPassword" required autocomplete="new-password" placeholder="Confirm your password" oninput="checkPasswordMatch()">
                         <small id="passwordMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
                     </div>
+                    <!-- Turnstile Widget for Registration -->
+                    <div id="registerTurnstile" class="cf-turnstile" style="margin-bottom: 16px; display: none;"></div>
                     <button type="submit" class="btn-primary">Create Account</button>
                     <div id="registerError" class="error-message"></div>
                 </form>
@@ -92,7 +98,7 @@
             <div class="menu-left">
                 <a href="#" onclick="goToHome(); return false;" class="menu-logo">
                     <img src="/logo.png" alt="Uptime Logo">
-                    <span>Uptime Monitor</span>
+                    <span>Uptovia</span>
                 </a>
             </div>
 
@@ -195,24 +201,43 @@
                 <div class="view-content">
                     <!-- Statistics Cards -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6);">
-                        <!-- Monitors Stats -->
+                        <!-- Monitors & Tags Stats Combined -->
                         <div class="content-card">
-                            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
-                                <div style="font-size: 40px;">📊</div>
-                                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">Monitors</h3>
-                            </div>
-                            <div style="display: grid; gap: var(--space-3);">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: var(--text-secondary);">Total Monitors</span>
-                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statTotalMonitors">0</span>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+                                <!-- Monitors Section -->
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+                                        <div style="font-size: 24px;">📊</div>
+                                        <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">Monitors</h3>
+                                    </div>
+                                    <div style="display: grid; gap: var(--space-2);">
+                                        <div>
+                                            <div style="color: var(--text-secondary); font-size: var(--text-xs);">Total</div>
+                                            <div style="font-size: var(--text-xl); font-weight: 700;" id="statTotalMonitors">0</div>
+                                        </div>
+                                        <div>
+                                            <div style="color: var(--text-secondary); font-size: var(--text-xs);">Active</div>
+                                            <div style="font-size: var(--text-xl); font-weight: 700; color: #34C759;" id="statActiveMonitors">0</div>
+                                        </div>
+                                        <div>
+                                            <div style="color: var(--text-secondary); font-size: var(--text-xs);">Paused</div>
+                                            <div style="font-size: var(--text-xl); font-weight: 700; color: #FF9500;" id="statPausedMonitors">0</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: var(--text-secondary);">Active</span>
-                                    <span style="font-size: var(--text-xl); font-weight: 700; color: #34C759;" id="statActiveMonitors">0</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: var(--text-secondary);">Paused</span>
-                                    <span style="font-size: var(--text-xl); font-weight: 700; color: #FF9500;" id="statPausedMonitors">0</span>
+
+                                <!-- Tags Section -->
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+                                        <div style="font-size: 24px;">🏷️</div>
+                                        <h3 style="font-size: var(--text-base); font-weight: 600; margin: 0;">Tags</h3>
+                                    </div>
+                                    <div style="display: grid; gap: var(--space-2);">
+                                        <div>
+                                            <div style="color: var(--text-secondary); font-size: var(--text-xs);">Total</div>
+                                            <div style="font-size: var(--text-xl); font-weight: 700;" id="statTotalTags">0</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -239,16 +264,24 @@
                             </div>
                         </div>
 
-                        <!-- Tags Stats -->
+                        <!-- Subscriptions Stats -->
                         <div class="content-card">
                             <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
-                                <div style="font-size: 40px;">🏷️</div>
-                                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">Tags</h3>
+                                <div style="font-size: 40px;">💳</div>
+                                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">Subscriptions</h3>
                             </div>
                             <div style="display: grid; gap: var(--space-3);">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="color: var(--text-secondary);">Total Tags</span>
-                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statTotalTags">0</span>
+                                    <span style="color: var(--text-secondary);">Free Plan</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statFreePlan">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Starter Plan</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statStarterPlan">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: var(--text-secondary);">Pro Plan</span>
+                                    <span style="font-size: var(--text-xl); font-weight: 700;" id="statProPlan">0</span>
                                 </div>
                             </div>
                         </div>
@@ -366,6 +399,7 @@
                     <button class="settings-tab" id="groupsTab" onclick="showSettingsTab('groups', event)" style="display: none;">Groups</button>
                     <button class="settings-tab" id="emailTab" onclick="showSettingsTab('email', event)" style="display: none;">Email</button>
                     <button class="settings-tab" id="apnsTab" onclick="showSettingsTab('apns', event)" style="display: none;">Push Notifications</button>
+                    <button class="settings-tab" id="turnstileTab" onclick="showSettingsTab('turnstile', event)" style="display: none;">Turnstile</button>
                 </div>
 
                 <!-- Account Settings Tab -->
@@ -375,7 +409,10 @@
                             <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">Account Information</h3>
                             <div class="setting-item">
                                 <div class="setting-label">Username</div>
-                                <div class="setting-value" id="settingsUsername">-</div>
+                                <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
+                                    <div class="setting-value" id="settingsUsername">-</div>
+                                    <button onclick="window.showChangeUsernameModal()" class="btn-secondary" style="padding: 4px 12px; font-size: var(--text-xs);">Change Username</button>
+                                </div>
                             </div>
                             <div class="setting-item">
                                 <div class="setting-label">Email</div>
@@ -554,19 +591,39 @@
                             </div>
 
                             <!-- Filter Buttons -->
-                            <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap;">
-                                <button id="filter-all" onclick="window.setStatusFilter('all')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
-                                    All (0)
-                                </button>
-                                <button id="filter-verified" onclick="window.setStatusFilter('verified')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
-                                    Verified (0)
-                                </button>
-                                <button id="filter-unverified" onclick="window.setStatusFilter('unverified')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
-                                    Not Verified (0)
-                                </button>
-                                <button id="filter-invited" onclick="window.setStatusFilter('invited')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
-                                    Invited (0)
-                                </button>
+                            <div style="margin-bottom: var(--space-4);">
+                                <div style="margin-bottom: var(--space-2);">
+                                    <strong style="font-size: var(--text-sm); color: var(--text-secondary);">Filter by Status:</strong>
+                                </div>
+                                <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-3); flex-wrap: wrap;">
+                                    <button id="filter-all" onclick="window.setStatusFilter('all')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                        All (0)
+                                    </button>
+                                    <button id="filter-verified" onclick="window.setStatusFilter('verified')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                        Verified (0)
+                                    </button>
+                                    <button id="filter-unverified" onclick="window.setStatusFilter('unverified')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                        Not Verified (0)
+                                    </button>
+                                    <button id="filter-invited" onclick="window.setStatusFilter('invited')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                        Invited (0)
+                                    </button>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-2);">
+                                    <strong style="font-size: var(--text-sm); color: var(--text-secondary);">Filter by Plan:</strong>
+                                </div>
+                                <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+                                    <button id="filter-free-plan" onclick="window.setPlanFilter('free')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                        💳 Free Plan (0)
+                                    </button>
+                                    <button id="filter-starter-plan" onclick="window.setPlanFilter('starter')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                        💳 Starter Plan (0)
+                                    </button>
+                                    <button id="filter-pro-plan" onclick="window.setPlanFilter('pro')" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">
+                                        💳 Pro Plan (0)
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Bulk Actions -->
@@ -723,6 +780,57 @@
                                     <li style="margin-bottom: var(--space-2);">Download the .p8 key file and upload it to your server</li>
                                     <li style="margin-bottom: var(--space-2);">Enter the Key ID and Team ID from Apple Developer</li>
                                     <li>Provide your iOS app's Bundle ID</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cloudflare Turnstile Settings Tab (Admin Only) -->
+                <div id="turnstileSettings" class="settings-tab-content">
+                    <div class="content-card">
+                        <div class="settings-section">
+                            <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">Cloudflare Turnstile Configuration</h3>
+                            <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-5);">
+                                Configure Cloudflare Turnstile for bot protection on login and registration forms
+                            </p>
+
+                            <form id="turnstileSettingsForm" onsubmit="saveTurnstileSettings(event)" style="max-width: 600px;">
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); cursor: pointer;">
+                                        <input type="checkbox" id="turnstileEnabled" style="width: 16px; height: 16px;">
+                                        <span style="font-weight: 500;">Enable Turnstile Protection</span>
+                                    </label>
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary);">When enabled, users must complete the Turnstile challenge to login or register</p>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">Site Key *</label>
+                                    <input type="text" id="turnstileSiteKey" placeholder="0x4AAAAAAA..." style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: var(--space-1);">Your Cloudflare Turnstile site key (visible on the client)</p>
+                                </div>
+
+                                <div style="margin-bottom: var(--space-5);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">Secret Key *</label>
+                                    <input type="password" id="turnstileSecretKey" placeholder="0x4AAAAAAA..." style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                    <p style="font-size: var(--text-xs); color: var(--text-secondary); margin-top: var(--space-1);">Your Cloudflare Turnstile secret key (used for server-side validation)</p>
+                                </div>
+
+                                <div id="turnstileSettingsError" class="error-message"></div>
+
+                                <div style="display: flex; gap: var(--space-3);">
+                                    <button type="submit" class="btn-primary">Save Settings</button>
+                                </div>
+                            </form>
+
+                            <div style="margin-top: var(--space-6); padding: var(--space-4); background: rgba(0, 122, 255, 0.1); border: 1px solid rgba(0, 122, 255, 0.3); border-radius: var(--radius-md);">
+                                <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--space-2); color: var(--primary);">🛡️ Setup Instructions</h4>
+                                <ol style="color: var(--text-secondary); font-size: var(--text-sm); margin: 0; padding-left: var(--space-5);">
+                                    <li style="margin-bottom: var(--space-2);">Create a Turnstile site in <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank" style="color: var(--primary); text-decoration: underline;">Cloudflare Dashboard</a></li>
+                                    <li style="margin-bottom: var(--space-2);">Choose "Managed" mode for automatic challenge difficulty</li>
+                                    <li style="margin-bottom: var(--space-2);">Copy your Site Key and Secret Key from the Cloudflare dashboard</li>
+                                    <li style="margin-bottom: var(--space-2);">Paste the keys above and enable Turnstile protection</li>
+                                    <li>Save the settings - Turnstile will appear on login and registration forms</li>
                                 </ol>
                             </div>
                         </div>
@@ -1044,6 +1152,61 @@
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
                 <button type="submit" form="changePasswordForm" class="btn-primary">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Username Modal -->
+    <div id="changeUsernameModal" class="modal">
+        <div class="modal-overlay" onclick="closeChangeUsernameModal()"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-header">
+                <h2>Change Username</h2>
+                <button class="modal-close" onclick="closeChangeUsernameModal()">✕</button>
+            </div>
+            <form id="changeUsernameForm" class="modal-body">
+                <div style="background: #E8F5E9; border: 1px solid #4CAF50; padding: var(--space-3); border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+                    <p style="margin: 0; color: #2E7D32; font-size: var(--text-sm);">
+                        📝 Current username: <strong id="currentUsernameDisplay"></strong>
+                    </p>
+                </div>
+                <div class="input-group">
+                    <label for="verifyCurrentUsername">Verify Current Username</label>
+                    <input type="text" id="verifyCurrentUsername" required placeholder="Type your current username to confirm">
+                    <small style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        Please type your current username exactly as shown above
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="newUsername">New Username</label>
+                    <input type="text" id="newUsername" required minlength="3" placeholder="Enter your new username" oninput="validateNewUsername()">
+                    <small id="newUsernameRequirements" style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-2); display: block;">
+                        Must be at least 3 characters
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="confirmNewUsername">Confirm New Username</label>
+                    <input type="text" id="confirmNewUsername" required placeholder="Confirm your new username" oninput="checkUsernameMatch()">
+                    <small id="usernameMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
+                </div>
+                <div class="input-group">
+                    <label for="passwordForUsername">Password</label>
+                    <input type="password" id="passwordForUsername" required placeholder="Enter your password to confirm">
+                    <small style="color: var(--text-secondary); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">
+                        Enter your password to authorize this change
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="confirmPasswordForUsername">Confirm Password</label>
+                    <input type="password" id="confirmPasswordForUsername" required placeholder="Confirm your password" oninput="checkPasswordForUsernameMatch()">
+                    <small id="passwordForUsernameMatchMessage" style="margin-top: var(--space-2); display: none;"></small>
+                </div>
+                <div id="changeUsernameError" class="error-message"></div>
+                <div id="changeUsernameSuccess" class="success-message"></div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeChangeUsernameModal()">Cancel</button>
+                <button type="submit" form="changeUsernameForm" class="btn-primary">Change Username</button>
             </div>
         </div>
     </div>

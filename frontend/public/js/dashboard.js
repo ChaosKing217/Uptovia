@@ -27,6 +27,11 @@ export async function loadDashboard() {
         // Update tags statistics
         document.getElementById('statTotalTags').textContent = data.totalTags;
 
+        // Update subscription statistics
+        document.getElementById('statFreePlan').textContent = data.freePlan || 0;
+        document.getElementById('statStarterPlan').textContent = data.starterPlan || 0;
+        document.getElementById('statProPlan').textContent = data.proPlan || 0;
+
         // Render monitors by status
         renderMonitorStatus(data.monitorsByStatus);
 

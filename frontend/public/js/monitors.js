@@ -3,7 +3,7 @@
 // ============================================
 
 import { apiRequest } from './api.js';
-import { getMonitors, setMonitors, getTags, getDeleteTarget, setDeleteTarget } from './state.js';
+import { getMonitors, setMonitors, getTags, getDeleteTarget, setDeleteTarget, getCurrentUser } from './state.js';
 import { showToast, escapeHtml } from './ui.js';
 
 // Symbol map for tag icons
@@ -243,6 +243,13 @@ export function filterMonitors() {
 // MONITOR CRUD
 // ============================================
 export function showAddMonitorModal() {
+    // Check if user's email is verified
+    const user = getCurrentUser();
+    if (!user.email_verified && !user.is_admin) {
+        showToast('Email Not Verified', 'Please verify your email address before creating monitors.', 'error');
+        return;
+    }
+
     document.getElementById('modalTitle').textContent = 'Add Monitor';
     document.getElementById('monitorId').value = '';
     document.getElementById('monitorForm').reset();

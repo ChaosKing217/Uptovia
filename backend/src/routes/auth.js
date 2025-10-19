@@ -92,14 +92,14 @@ router.post('/register', async (req, res) => {
 
         const user = result.rows[0];
 
-        // Assign user to default Member group (id: 2)
+        // Assign user to Free Plan (id: 2) by default
         try {
             await db.query(
                 'INSERT INTO user_groups (user_id, group_id, role) VALUES ($1, 2, $2)',
                 [user.id, 'member']
             );
         } catch (error) {
-            console.error('Failed to assign user to Member group:', error);
+            console.error('Failed to assign user to Free Plan:', error);
             // Don't fail registration if group assignment fails
         }
 
@@ -944,6 +944,70 @@ router.post('/setup-account', async (req, res) => {
     } catch (error) {
         console.error('Account setup error:', error);
         res.status(500).json({ error: 'Failed to complete account setup' });
+    }
+});
+
+// Change username
+router.post('/change-username', verifyToken, async (req, res) => {
+    try {
+        const { currentUsername, newUsername, password } = req.body;
+
+        if (!currentUsername || !newUsername || !password) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Get user
+        const userResult = await db.query(
+            'SELECT id, username, password_hash FROM users WHERE id = $1',
+            [req.userId]
+        );
+
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const user = userResult.rows[0];
+
+        // Verify current username matches
+        if (user.username !== currentUsername) {
+            return res.status(400).json({ error: 'Current username verification failed' });
+        }
+
+        // Verify password
+        const passwordMatch = await bcrypt.compare(password, user.password_hash);
+        if (!passwordMatch) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+
+        // Validate new username
+        if (newUsername.length < 3) {
+            return res.status(400).json({ error: 'Username must be at least 3 characters long' });
+        }
+
+        if (newUsername === currentUsername) {
+            return res.status(400).json({ error: 'New username must be different from current username' });
+        }
+
+        // Check if new username is already taken
+        const existingUser = await db.query(
+            'SELECT id FROM users WHERE username = $1 AND id != $2',
+            [newUsername, req.userId]
+        );
+
+        if (existingUser.rows.length > 0) {
+            return res.status(409).json({ error: 'Username is already taken' });
+        }
+
+        // Update username
+        await db.query(
+            'UPDATE users SET username = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [newUsername, req.userId]
+        );
+
+        res.json({ message: 'Username changed successfully' });
+    } catch (error) {
+        console.error('Change username error:', error);
+        res.status(500).json({ error: 'Failed to change username' });
     }
 });
 

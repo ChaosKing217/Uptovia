@@ -15,6 +15,7 @@ const tagRoutes = require('./routes/tags');
 const emailSettingsRoutes = require('./routes/emailSettings');
 const monitoringSettingsRoutes = require('./routes/monitoringSettings');
 const apnsSettingsRoutes = require('./routes/apnsSettings');
+const settingsRoutes = require('./routes/settings');
 const pushNotifications = require('./services/pushNotifications');
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/tags', tagRoutes);
 app.use('/api/email-settings', emailSettingsRoutes);
 app.use('/api/monitoring-settings', monitoringSettingsRoutes);
 app.use('/api/apns-settings', apnsSettingsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

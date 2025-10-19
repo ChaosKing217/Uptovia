@@ -28,12 +28,21 @@ export async function showDashboard() {
     document.getElementById('menuUsername').textContent = user.username;
     document.getElementById('mobileUsername').textContent = user.username;
 
-    // Set user role based on their primary group
-    if (user.groups && user.groups.length > 0) {
-        const roleName = user.groups[0].name;
-        document.getElementById('menuUserRole').textContent = roleName;
-        document.getElementById('mobileUserRole').textContent = roleName;
+    // Set user role based on admin status or subscription plan
+    let roleName = 'User';
+    if (user.is_admin) {
+        roleName = 'Admin';
+    } else if (user.groups && user.groups.length > 0) {
+        // Find subscription plan group (Free Plan, Starter Plan, Pro Plan)
+        const subscriptionPlan = user.groups.find(g =>
+            g.name === 'Free Plan' || g.name === 'Starter Plan' || g.name === 'Pro Plan'
+        );
+        if (subscriptionPlan) {
+            roleName = subscriptionPlan.name;
+        }
     }
+    document.getElementById('menuUserRole').textContent = roleName;
+    document.getElementById('mobileUserRole').textContent = roleName;
 
     // Load data first to get updated user info
     await loadData();
@@ -153,11 +162,20 @@ async function loadData() {
 
         // Update user role with group info in all locations
         const updatedUser = getCurrentUser();
-        if (updatedUser.groups && updatedUser.groups.length > 0) {
-            const roleName = updatedUser.groups[0].name;
-            document.getElementById('menuUserRole').textContent = roleName;
-            document.getElementById('mobileUserRole').textContent = roleName;
+        let roleName = 'User';
+        if (updatedUser.is_admin) {
+            roleName = 'Admin';
+        } else if (updatedUser.groups && updatedUser.groups.length > 0) {
+            // Find subscription plan group (Free Plan, Starter Plan, Pro Plan)
+            const subscriptionPlan = updatedUser.groups.find(g =>
+                g.name === 'Free Plan' || g.name === 'Starter Plan' || g.name === 'Pro Plan'
+            );
+            if (subscriptionPlan) {
+                roleName = subscriptionPlan.name;
+            }
         }
+        document.getElementById('menuUserRole').textContent = roleName;
+        document.getElementById('mobileUserRole').textContent = roleName;
 
         // Update dashboard nav visibility based on admin status (both desktop and mobile)
         const dashboardNavItem = document.getElementById('dashboardNavItem');

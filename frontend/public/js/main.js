@@ -33,7 +33,8 @@ import {
     closeChangePasswordModal,
     handleChangePassword,
     validateChangePassword,
-    checkChangePasswordMatch
+    checkChangePasswordMatch,
+    loadTurnstileConfig
 } from './auth.js';
 
 import {
@@ -75,15 +76,24 @@ import {
     sendTestEmail,
     loadApnsSettings,
     saveApnsSettings,
+    loadTurnstileSettings,
+    saveTurnstileSettings,
     resendVerification,
     showChangeEmailModal,
-    handleChangeEmail
+    handleChangeEmail,
+    showChangeUsernameModal,
+    closeChangeUsernameModal,
+    validateNewUsername,
+    checkUsernameMatch,
+    checkPasswordForUsernameMatch,
+    handleChangeUsername
 } from './settings.js';
 
 import {
     loadUsers,
     filterUsers,
     setStatusFilter,
+    setPlanFilter,
     showCreateUserModal,
     handleCreateUser,
     showEditUserModal,
@@ -92,7 +102,9 @@ import {
     resendVerificationEmail,
     resendSetupEmail,
     bulkResendVerification,
-    bulkResendSetup
+    bulkResendSetup,
+    showChangeSubscriptionModal,
+    handleChangeSubscription
 } from './users.js';
 
 import { loadDashboard } from './dashboard.js';
@@ -176,13 +188,22 @@ window.closeDeleteAccountModal = closeDeleteAccountModal;
 window.executeDeleteAccount = executeDeleteAccount;
 window.confirmClearAllData = confirmClearAllData;
 window.sendTestEmail = sendTestEmail;
+window.loadTurnstileSettings = loadTurnstileSettings;
+window.saveTurnstileSettings = saveTurnstileSettings;
 window.resendVerification = resendVerification;
 window.showChangeEmailModal = showChangeEmailModal;
 window.handleChangeEmail = handleChangeEmail;
+window.showChangeUsernameModal = showChangeUsernameModal;
+window.closeChangeUsernameModal = closeChangeUsernameModal;
+window.validateNewUsername = validateNewUsername;
+window.checkUsernameMatch = checkUsernameMatch;
+window.checkPasswordForUsernameMatch = checkPasswordForUsernameMatch;
+window.handleChangeUsername = handleChangeUsername;
 
 // User Management Functions
 window.filterUsers = filterUsers;
 window.setStatusFilter = setStatusFilter;
+window.setPlanFilter = setPlanFilter;
 window.showCreateUserModal = showCreateUserModal;
 window.handleCreateUser = handleCreateUser;
 window.showEditUserModal = showEditUserModal;
@@ -192,6 +213,8 @@ window.resendVerificationEmail = resendVerificationEmail;
 window.resendSetupEmail = resendSetupEmail;
 window.bulkResendVerification = bulkResendVerification;
 window.bulkResendSetup = bulkResendSetup;
+window.showChangeSubscriptionModal = showChangeSubscriptionModal;
+window.handleChangeSubscription = handleChangeSubscription;
 
 // Group Management Functions
 window.showAddGroupModal = showAddGroupModal;
@@ -272,6 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('dark-theme');
         updateThemeIcon();
     }
+
+    // Load Turnstile configuration
+    loadTurnstileConfig();
 
     // Check for existing auth
     const savedToken = localStorage.getItem('authToken');
