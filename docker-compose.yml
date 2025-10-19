@@ -1,10 +1,10 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: uptime-monitor-db
+    container_name: uptovia-monitor-db
     environment:
-      POSTGRES_DB: uptime_monitor
-      POSTGRES_USER: ${POSTGRES_USER:-uptimeuser}
+      POSTGRES_DB: uptovia
+      POSTGRES_USER: ${POSTGRES_USER:-uptovia}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -22,12 +22,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: uptime-monitor-app
+    container_name: uptovia-monitor-app
     environment:
       NODE_ENV: production
       PORT: 3000
       FRONTEND_PATH: /app/frontend/public
-      DATABASE_URL: postgresql://${POSTGRES_USER:-uptimeuser}:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/uptime_monitor
+      DATABASE_URL: postgresql://${POSTGRES_USER:-uptovia}:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/uptovia
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this}
       API_KEY_SALT: ${API_KEY_SALT:-your-api-key-salt-change-this}
       # APNs Configuration (for Push Notifications)
