@@ -392,24 +392,32 @@ function renderTagsSelector(selectedTagIds = []) {
         return;
     }
 
-    container.innerHTML = tags.map(tag => `
-        <input type="checkbox"
-               id="tag-${tag.id}"
-               class="tag-checkbox"
-               value="${tag.id}"
-               ${selectedTagIds.includes(tag.id) ? 'checked' : ''}>
-        <label for="tag-${tag.id}" class="tag-checkbox-label">
-            <span class="tag-checkbox-color" style="background-color: ${tag.color}">
-                ${symbolMap[tag.symbol] || symbolMap['tag.fill']}
-            </span>
-            ${escapeHtml(tag.name)}
-        </label>
-    `).join('');
+    container.innerHTML = tags.map(tag => {
+        const isSelected = selectedTagIds.includes(tag.id);
+        return `
+            <div class="tag-option ${isSelected ? 'selected' : ''}"
+                 style="background-color: ${tag.color}; color: white;"
+                 data-tag-id="${tag.id}"
+                 onclick="toggleTagSelection(${tag.id})">
+                <span class="tag-icon">${symbolMap[tag.symbol] || symbolMap['tag.fill']}</span>
+                <span class="tag-name">${escapeHtml(tag.name)}</span>
+                <span class="tag-checkmark" style="color: ${tag.color}; background: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px;">✓</span>
+            </div>
+        `;
+    }).join('');
 }
 
+// Toggle tag selection
+window.toggleTagSelection = function(tagId) {
+    const tagElement = document.querySelector(`[data-tag-id="${tagId}"]`);
+    if (tagElement) {
+        tagElement.classList.toggle('selected');
+    }
+};
+
 function getSelectedTags() {
-    const checkboxes = document.querySelectorAll('.tag-checkbox:checked');
-    return Array.from(checkboxes).map(cb => parseInt(cb.value));
+    const selectedTags = document.querySelectorAll('.tag-option.selected');
+    return Array.from(selectedTags).map(tag => parseInt(tag.dataset.tagId));
 }
 
 // ============================================

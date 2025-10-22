@@ -503,16 +503,16 @@
                     <div class="content-card">
                         <div class="settings-section">
                             <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">Notifications</h3>
-                            <div class="setting-item">
-                                <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer;">
-                                    <input type="checkbox" id="notifyOnDown" checked style="width: 16px; height: 16px;" onchange="saveMonitoringSettings()">
-                                    <span style="font-size: var(--text-sm);">Notify when monitors go down</span>
+                            <div class="toggle-group">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notifyOnDown" checked onchange="saveMonitoringSettings()">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Notify when monitors go down</span>
                                 </label>
-                            </div>
-                            <div class="setting-item">
-                                <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer;">
-                                    <input type="checkbox" id="notifyOnUp" checked style="width: 16px; height: 16px;" onchange="saveMonitoringSettings()">
-                                    <span style="font-size: var(--text-sm);">Notify when monitors come back up</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notifyOnUp" checked onchange="saveMonitoringSettings()">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Notify when monitors come back up</span>
                                 </label>
                             </div>
                             <div style="margin-top: var(--space-4); padding: var(--space-3); background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border);">
@@ -665,17 +665,17 @@
                                     <input type="text" id="smtpHost" placeholder="smtp.example.com" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
                                 </div>
 
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
-                                    <div>
-                                        <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">SMTP Port *</label>
-                                        <input type="number" id="smtpPort" placeholder="587" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
-                                    </div>
-                                    <div style="display: flex; align-items: flex-end;">
-                                        <label style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); cursor: pointer;">
-                                            <input type="checkbox" id="smtpSecure" style="width: 18px; height: 18px; cursor: pointer;">
-                                            <span style="font-weight: 500;">Use SSL/TLS (Port 465)</span>
-                                        </label>
-                                    </div>
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label style="display: block; margin-bottom: var(--space-2); font-weight: 500;">SMTP Port *</label>
+                                    <input type="number" id="smtpPort" placeholder="587" required style="width: 100%; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); color: var(--text-primary);">
+                                </div>
+
+                                <div style="margin-bottom: var(--space-4);">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="smtpSecure">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-label">Use SSL/TLS (Port 465)</span>
+                                    </label>
                                 </div>
 
                                 <div style="margin-bottom: var(--space-4);">
@@ -772,9 +772,10 @@
 
                             <form id="turnstileSettingsForm" onsubmit="saveTurnstileSettings(event)" style="max-width: 600px;">
                                 <div style="margin-bottom: var(--space-4);">
-                                    <label style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); cursor: pointer;">
-                                        <input type="checkbox" id="turnstileEnabled" style="width: 16px; height: 16px;">
-                                        <span style="font-weight: 500;">Enable Turnstile Protection</span>
+                                    <label class="toggle-switch" style="margin-bottom: var(--space-3);">
+                                        <input type="checkbox" id="turnstileEnabled">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-label">Enable Turnstile Protection</span>
                                     </label>
                                     <p style="font-size: var(--text-xs); color: var(--text-secondary);">When enabled, users must complete the Turnstile challenge to login or register</p>
                                 </div>
@@ -911,18 +912,21 @@
                     <small class="input-hint">Select tags to organize this monitor</small>
                 </div>
 
-                <div class="checkbox-group">
-                    <label class="checkbox-label">
+                <div class="toggle-group">
+                    <label class="toggle-switch">
                         <input type="checkbox" id="notifyOnDownModal" checked>
-                        <span>Notify when monitor goes down</span>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Notify when monitor goes down</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="toggle-switch">
                         <input type="checkbox" id="notifyOnUpModal" checked>
-                        <span>Notify when monitor comes back up</span>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Notify when monitor comes back up</span>
                     </label>
-                    <label class="checkbox-label">
+                    <label class="toggle-switch">
                         <input type="checkbox" id="monitorActive" checked>
-                        <span>Monitor is active</span>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Monitor is active</span>
                     </label>
                 </div>
 

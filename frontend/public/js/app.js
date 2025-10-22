@@ -1787,14 +1787,18 @@ function showCreateUserModal() {
                         </small>
                     </div>
 
-                    <div style="display: flex; align-items: center; gap: var(--space-2);">
-                        <input type="checkbox" id="createIsAdmin" style="width: 16px; height: 16px;">
-                        <label for="createIsAdmin" style="font-weight: 500; cursor: pointer;">Administrator</label>
-                    </div>
+                    <div class="toggle-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="createIsAdmin">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Administrator</span>
+                        </label>
 
-                    <div style="display: flex; align-items: center; gap: var(--space-2);">
-                        <input type="checkbox" id="createForcePasswordReset" checked style="width: 16px; height: 16px;">
-                        <label for="createForcePasswordReset" style="font-weight: 500; cursor: pointer;">Force password change on first login</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="createForcePasswordReset" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Force password change on first login</span>
+                        </label>
                     </div>
 
                     <div id="createUserError" class="error-message"></div>
@@ -1874,14 +1878,18 @@ async function showEditUserModal(userId) {
                             </small>
                         </div>
 
-                        <div style="display: flex; align-items: center; gap: var(--space-2);">
-                            <input type="checkbox" id="editIsAdmin" ${user.is_admin ? 'checked' : ''} style="width: 16px; height: 16px;">
-                            <label for="editIsAdmin" style="font-weight: 500; cursor: pointer;">Administrator</label>
-                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="editIsAdmin" ${user.is_admin ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Administrator</span>
+                            </label>
 
-                        <div style="display: flex; align-items: center; gap: var(--space-2);">
-                            <input type="checkbox" id="editForcePasswordReset" ${user.force_password_reset ? 'checked' : ''} style="width: 16px; height: 16px;">
-                            <label for="editForcePasswordReset" style="font-weight: 500; cursor: pointer;">Force password change on next login</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="editForcePasswordReset" ${user.force_password_reset ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Force password change on next login</span>
+                            </label>
                         </div>
 
                         <div id="editUserError" class="error-message"></div>
