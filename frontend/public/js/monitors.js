@@ -401,7 +401,7 @@ function renderTagsSelector(selectedTagIds = []) {
                  onclick="toggleTagSelection(${tag.id})">
                 <span class="tag-icon">${symbolMap[tag.symbol] || symbolMap['tag.fill']}</span>
                 <span class="tag-name">${escapeHtml(tag.name)}</span>
-                <span class="tag-checkmark" style="color: ${tag.color}; background: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px;">✓</span>
+                <span class="tag-checkmark" style="color: ${tag.color};">✓</span>
             </div>
         `;
     }).join('');
