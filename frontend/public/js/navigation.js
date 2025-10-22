@@ -28,19 +28,8 @@ export async function showDashboard() {
     document.getElementById('menuUsername').textContent = user.username;
     document.getElementById('mobileUsername').textContent = user.username;
 
-    // Set user role based on admin status or subscription plan
-    let roleName = 'User';
-    if (user.is_admin) {
-        roleName = 'Admin';
-    } else if (user.groups && user.groups.length > 0) {
-        // Find subscription plan group (Free Plan, Starter Plan, Pro Plan)
-        const subscriptionPlan = user.groups.find(g =>
-            g.name === 'Free Plan' || g.name === 'Starter Plan' || g.name === 'Pro Plan'
-        );
-        if (subscriptionPlan) {
-            roleName = subscriptionPlan.name;
-        }
-    }
+    // Set user role based on admin status
+    let roleName = user.is_admin ? 'Admin' : 'Member';
     document.getElementById('menuUserRole').textContent = roleName;
     document.getElementById('mobileUserRole').textContent = roleName;
 
@@ -160,20 +149,9 @@ async function loadData() {
         setCurrentUser({ ...user, ...data.user });
         localStorage.setItem('currentUser', JSON.stringify(getCurrentUser()));
 
-        // Update user role with group info in all locations
+        // Update user role in all locations
         const updatedUser = getCurrentUser();
-        let roleName = 'User';
-        if (updatedUser.is_admin) {
-            roleName = 'Admin';
-        } else if (updatedUser.groups && updatedUser.groups.length > 0) {
-            // Find subscription plan group (Free Plan, Starter Plan, Pro Plan)
-            const subscriptionPlan = updatedUser.groups.find(g =>
-                g.name === 'Free Plan' || g.name === 'Starter Plan' || g.name === 'Pro Plan'
-            );
-            if (subscriptionPlan) {
-                roleName = subscriptionPlan.name;
-            }
-        }
+        let roleName = updatedUser.is_admin ? 'Admin' : 'Member';
         document.getElementById('menuUserRole').textContent = roleName;
         document.getElementById('mobileUserRole').textContent = roleName;
 

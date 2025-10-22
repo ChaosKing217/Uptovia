@@ -51,17 +51,7 @@ export function filterUsers() {
         });
     }
 
-    // Apply plan filter
-    if (currentPlanFilter !== 'all') {
-        filteredUsers = filteredUsers.filter(user => {
-            if (user.is_admin) return false; // Exclude admins from plan filters
-            const planName = user.subscription_plan_name;
-            if (currentPlanFilter === 'free') return planName === 'Free Plan';
-            if (currentPlanFilter === 'starter') return planName === 'Starter Plan';
-            if (currentPlanFilter === 'pro') return planName === 'Pro Plan';
-            return false;
-        });
-    }
+    // Plan filter removed - no longer needed
 
     // Apply search filter
     if (searchTerm) {
@@ -83,10 +73,7 @@ export function setStatusFilter(status) {
 }
 
 export function setPlanFilter(plan) {
-    currentPlanFilter = plan;
-    currentStatusFilter = 'all'; // Reset status filter when changing plan filter
-    updateFilterButtons();
-    filterUsers();
+    // Removed - subscription plans no longer exist
 }
 
 function getUserStatus(user) {
@@ -147,18 +134,7 @@ function updateFilterButtons() {
     if (invitedBtn) invitedBtn.textContent = `Invited (${invitedCount})`;
     if (allBtn) allBtn.textContent = `All (${allUsers.length})`;
 
-    // Update counts for plan filters
-    const freePlanCount = allUsers.filter(u => !u.is_admin && u.subscription_plan_name === 'Free Plan').length;
-    const starterPlanCount = allUsers.filter(u => !u.is_admin && u.subscription_plan_name === 'Starter Plan').length;
-    const proPlanCount = allUsers.filter(u => !u.is_admin && u.subscription_plan_name === 'Pro Plan').length;
-
-    const freePlanBtn = document.getElementById('filter-free-plan');
-    const starterPlanBtn = document.getElementById('filter-starter-plan');
-    const proPlanBtn = document.getElementById('filter-pro-plan');
-
-    if (freePlanBtn) freePlanBtn.textContent = `💳 Free Plan (${freePlanCount})`;
-    if (starterPlanBtn) starterPlanBtn.textContent = `💳 Starter Plan (${starterPlanCount})`;
-    if (proPlanBtn) proPlanBtn.textContent = `💳 Pro Plan (${proPlanCount})`;
+    // Plan filter counts removed - subscription plans no longer exist
 }
 
 // ============================================
@@ -190,19 +166,13 @@ function renderUsers(users) {
                     : '<span style="background: #FF9500; color: white; font-size: var(--text-xs); padding: 2px 6px; border-radius: var(--radius-sm);">⚠ Unverified</span>')
         ) : '';
 
-        // Subscription plan badge
-        const getPlanBadge = () => {
+        // Group badge - show Member group for non-admin users
+        const getGroupBadge = () => {
             if (user.is_admin) return '';
-            if (!user.subscription_plan_name) {
-                return '<span style="background: #8E8E93; color: white; font-size: var(--text-xs); padding: 2px 8px; border-radius: var(--radius-sm);">No Plan</span>';
+            if (user.group_name) {
+                return `<span style="background: #5AC8FA; color: white; font-size: var(--text-xs); padding: 2px 8px; border-radius: var(--radius-sm);">${escapeHtml(user.group_name)}</span>`;
             }
-            const planColors = {
-                'Free Plan': '#FF9500',
-                'Starter Plan': '#5AC8FA',
-                'Pro Plan': '#34C759'
-            };
-            const color = planColors[user.subscription_plan_name] || '#8E8E93';
-            return `<span style="background: ${color}; color: white; font-size: var(--text-xs); padding: 2px 8px; border-radius: var(--radius-sm);">💳 ${escapeHtml(user.subscription_plan_name)}</span>`;
+            return '';
         };
 
         return `
@@ -212,7 +182,7 @@ function renderUsers(users) {
                         <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
                             <h4 style="font-size: var(--text-base); font-weight: 600; margin: 0;">${escapeHtml(user.username)}</h4>
                             ${user.is_admin ? '<span style="background: var(--primary); color: white; font-size: var(--text-xs); padding: 2px 8px; border-radius: var(--radius-sm);">Admin</span>' : ''}
-                            ${getPlanBadge()}
+                            ${getGroupBadge()}
                         </div>
                         <div style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-1); display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
                             📧 ${escapeHtml(user.email || 'No email')}
@@ -326,7 +296,6 @@ export async function showEditUserModal(userId) {
     try {
         const data = await apiRequest(`/users/admin/${userId}`);
         const user = data.user;
-        const currentPlanId = user.subscription_plan_id;
 
         const modalHtml = `
             <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;" onclick="this.remove()">
@@ -365,44 +334,6 @@ export async function showEditUserModal(userId) {
                             <label for="editForcePasswordReset" style="font-weight: 500; cursor: pointer;">Force password change on next login</label>
                         </div>
 
-                        ${!user.is_admin ? `
-                            <div>
-                                <label style="display: block; margin-bottom: var(--space-3); font-weight: 500;">Subscription Plan</label>
-                                ${!user.email_verified ? `
-                                    <div style="background: #FFF3CD; border: 1px solid #FFE69C; padding: var(--space-3); border-radius: var(--radius-md); margin-bottom: var(--space-3);">
-                                        <p style="margin: 0; color: #664D03; font-size: var(--text-sm);">
-                                            ⚠ User must verify their email before subscribing to paid plans.
-                                        </p>
-                                    </div>
-                                ` : ''}
-                                <div style="display: flex; flex-direction: column; gap: var(--space-2);">
-                                    <label style="display: flex; align-items: center; padding: var(--space-3); border: 2px solid ${currentPlanId === 2 ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); cursor: pointer; background: ${currentPlanId === 2 ? 'rgba(0, 122, 255, 0.1)' : 'transparent'};">
-                                        <input type="radio" name="subscriptionPlan" value="2" ${currentPlanId === 2 || !currentPlanId ? 'checked' : ''} style="margin-right: var(--space-2);">
-                                        <div style="flex: 1;">
-                                            <div style="font-weight: 600;">Free Plan</div>
-                                            <div style="font-size: var(--text-xs); color: var(--text-secondary);">Max 5 monitors, 2 tags • Free</div>
-                                        </div>
-                                    </label>
-
-                                    <label style="display: flex; align-items: center; padding: var(--space-3); border: 2px solid ${currentPlanId === 3 ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); cursor: ${user.email_verified ? 'pointer' : 'not-allowed'}; opacity: ${user.email_verified ? '1' : '0.5'}; background: ${currentPlanId === 3 ? 'rgba(0, 122, 255, 0.1)' : 'transparent'};">
-                                        <input type="radio" name="subscriptionPlan" value="3" ${currentPlanId === 3 ? 'checked' : ''} ${!user.email_verified ? 'disabled' : ''} style="margin-right: var(--space-2);">
-                                        <div style="flex: 1;">
-                                            <div style="font-weight: 600;">Starter Plan</div>
-                                            <div style="font-size: var(--text-xs); color: var(--text-secondary);">Max 10 monitors, 5 tags • €4.99/month</div>
-                                        </div>
-                                    </label>
-
-                                    <label style="display: flex; align-items: center; padding: var(--space-3); border: 2px solid ${currentPlanId === 4 ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); cursor: ${user.email_verified ? 'pointer' : 'not-allowed'}; opacity: ${user.email_verified ? '1' : '0.5'}; background: ${currentPlanId === 4 ? 'rgba(0, 122, 255, 0.1)' : 'transparent'};">
-                                        <input type="radio" name="subscriptionPlan" value="4" ${currentPlanId === 4 ? 'checked' : ''} ${!user.email_verified ? 'disabled' : ''} style="margin-right: var(--space-2);">
-                                        <div style="flex: 1;">
-                                            <div style="font-weight: 600;">Pro Plan</div>
-                                            <div style="font-size: var(--text-xs); color: var(--text-secondary);">Unlimited monitors and tags • €9.99/month</div>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        ` : ''}
-
                         <div id="editUserError" class="error-message"></div>
 
                         <div style="display: flex; gap: var(--space-2); justify-content: flex-end;">
@@ -431,13 +362,6 @@ export async function handleEditUser(e, userId) {
     const isAdmin = document.getElementById('editIsAdmin').checked;
     const forcePasswordReset = document.getElementById('editForcePasswordReset').checked;
 
-    // Get subscription plan if not admin
-    let subscriptionPlanId = null;
-    const subscriptionPlanInput = document.querySelector('input[name="subscriptionPlan"]:checked');
-    if (subscriptionPlanInput) {
-        subscriptionPlanId = parseInt(subscriptionPlanInput.value);
-    }
-
     try {
         const body = {
             username,
@@ -456,14 +380,6 @@ export async function handleEditUser(e, userId) {
             method: 'PUT',
             body: JSON.stringify(body)
         });
-
-        // Update subscription plan if it exists and user is not admin
-        if (subscriptionPlanId && !isAdmin) {
-            await apiRequest(`/users/admin/${userId}/subscription`, {
-                method: 'PUT',
-                body: JSON.stringify({ subscriptionPlanId })
-            });
-        }
 
         showToast('User Updated', `${username} has been updated successfully.`, 'success');
         document.querySelector('[style*="position: fixed"]').remove();
@@ -566,105 +482,12 @@ export async function bulkResendSetup() {
 }
 
 // ============================================
-// SUBSCRIPTION MANAGEMENT
+// SUBSCRIPTION MANAGEMENT - REMOVED
 // ============================================
 export async function showChangeSubscriptionModal(userId, username, currentPlanId) {
-    try {
-        // Fetch user data to check email verification status
-        const data = await apiRequest(`/users/admin/${userId}`);
-        const user = data.user;
-
-        // Check if email is verified
-        if (!user.email_verified) {
-            showToast('Email Not Verified', 'User must verify their email before changing subscription plans.', 'error');
-            return;
-        }
-
-        const modalHtml = `
-            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;" onclick="this.remove()">
-                <div style="background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-lg); max-width: 500px; width: 90%; padding: var(--space-6);" onclick="event.stopPropagation()">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5);">
-                        <h2 style="font-size: var(--text-xl); font-weight: 600;">Change Subscription Plan</h2>
-                        <button onclick="this.closest('[style*=fixed]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary);">×</button>
-                    </div>
-
-                    <div style="margin-bottom: var(--space-4);">
-                        <p style="color: var(--text-secondary); margin-bottom: var(--space-3);">
-                            Change subscription plan for <strong>${escapeHtml(username)}</strong>
-                        </p>
-                    </div>
-
-                    <form onsubmit="window.handleChangeSubscription(event, ${userId}, '${escapeHtml(username)}')" style="display: flex; flex-direction: column; gap: var(--space-4);">
-                        <div>
-                            <label style="display: block; margin-bottom: var(--space-3); font-weight: 500;">Select Plan</label>
-
-                            <div style="display: flex; flex-direction: column; gap: var(--space-2);">
-                                <label style="display: flex; align-items: center; padding: var(--space-3); border: 2px solid ${currentPlanId === 2 ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); cursor: pointer; background: ${currentPlanId === 2 ? 'rgba(0, 122, 255, 0.1)' : 'transparent'};">
-                                    <input type="radio" name="subscriptionPlan" value="2" ${currentPlanId === 2 ? 'checked' : ''} style="margin-right: var(--space-2);">
-                                    <div style="flex: 1;">
-                                        <div style="font-weight: 600;">Free Plan</div>
-                                        <div style="font-size: var(--text-xs); color: var(--text-secondary);">Max 5 monitors, 2 tags • Free</div>
-                                    </div>
-                                </label>
-
-                                <label style="display: flex; align-items: center; padding: var(--space-3); border: 2px solid ${currentPlanId === 3 ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); cursor: pointer; background: ${currentPlanId === 3 ? 'rgba(0, 122, 255, 0.1)' : 'transparent'};">
-                                    <input type="radio" name="subscriptionPlan" value="3" ${currentPlanId === 3 ? 'checked' : ''} style="margin-right: var(--space-2);">
-                                    <div style="flex: 1;">
-                                        <div style="font-weight: 600;">Starter Plan</div>
-                                        <div style="font-size: var(--text-xs); color: var(--text-secondary);">Max 10 monitors, 5 tags • €4.99/month</div>
-                                    </div>
-                                </label>
-
-                                <label style="display: flex; align-items: center; padding: var(--space-3); border: 2px solid ${currentPlanId === 4 ? 'var(--primary)' : 'var(--border)'}; border-radius: var(--radius-md); cursor: pointer; background: ${currentPlanId === 4 ? 'rgba(0, 122, 255, 0.1)' : 'transparent'};">
-                                    <input type="radio" name="subscriptionPlan" value="4" ${currentPlanId === 4 ? 'checked' : ''} style="margin-right: var(--space-2);">
-                                    <div style="flex: 1;">
-                                        <div style="font-weight: 600;">Pro Plan</div>
-                                        <div style="font-size: var(--text-xs); color: var(--text-secondary);">Unlimited monitors and tags • €9.99/month</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div id="changeSubscriptionError" class="error-message"></div>
-
-                        <div style="display: flex; gap: var(--space-2); justify-content: flex-end;">
-                            <button type="button" onclick="this.closest('[style*=fixed]').remove()" class="btn-secondary">Cancel</button>
-                            <button type="submit" class="btn-primary">Update Plan</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `;
-
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    } catch (error) {
-        showToast('Load Failed', error.message, 'error');
-    }
+    // Removed - subscription plans no longer exist
 }
 
 export async function handleChangeSubscription(e, userId, username) {
-    e.preventDefault();
-    const errorDiv = document.getElementById('changeSubscriptionError');
-    errorDiv.textContent = '';
-
-    const selectedPlan = document.querySelector('input[name="subscriptionPlan"]:checked');
-    if (!selectedPlan) {
-        errorDiv.textContent = 'Please select a subscription plan';
-        return;
-    }
-
-    const subscriptionPlanId = parseInt(selectedPlan.value);
-
-    try {
-        const data = await apiRequest(`/users/admin/${userId}/subscription`, {
-            method: 'PUT',
-            body: JSON.stringify({ subscriptionPlanId })
-        });
-
-        showToast('Plan Updated', `${username}'s subscription has been changed to ${data.newPlan}`, 'success');
-        document.querySelector('[style*="position: fixed"]').remove();
-        loadUsers();
-    } catch (error) {
-        errorDiv.textContent = error.message;
-    }
+    // Removed - subscription plans no longer exist
 }

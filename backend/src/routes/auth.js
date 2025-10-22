@@ -144,14 +144,14 @@ router.post('/register', async (req, res) => {
 
         const user = result.rows[0];
 
-        // Assign user to Free Plan (id: 2) by default
+        // Assign user to Member group (id: 2) by default
         try {
             await db.query(
                 'INSERT INTO user_groups (user_id, group_id, role) VALUES ($1, 2, $2)',
                 [user.id, 'member']
             );
         } catch (error) {
-            console.error('Failed to assign user to Free Plan:', error);
+            console.error('Failed to assign user to Member group:', error);
             // Don't fail registration if group assignment fails
         }
 

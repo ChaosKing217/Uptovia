@@ -200,9 +200,7 @@ CREATE INDEX IF NOT EXISTS idx_monitoring_settings_user_id ON monitoring_setting
 INSERT INTO groups (id, name, description, created_by)
 VALUES
     (1, 'Admin', 'Administrator group with full access', NULL),
-    (2, 'Free Plan', 'Free subscription plan - Max 5 monitors, 2 tags', NULL),
-    (3, 'Starter Plan', 'Starter subscription plan - Max 10 monitors, 5 tags', NULL),
-    (4, 'Pro Plan', 'Professional subscription plan - Unlimited monitors and tags', NULL)
+    (2, 'Member', 'Default member group', NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- Set sequence for groups id to start after default groups
@@ -219,11 +217,11 @@ INSERT INTO users (username, email, password_hash, api_key, is_admin, force_pass
 VALUES ('admin', 'admin@example.com', '$2a$10$ZhRLu.K0ov4Y7k5mHIz9PO6uiLHHQj6y.6dO9QxqAjXO/IxiatCdC', 'default-api-key-change-this-immediately', true, true, true, true)
 ON CONFLICT (username) DO NOTHING;
 
--- Assign admin user to Admin group as owner and Pro Plan
+-- Assign admin user to Admin group as owner and Member group
 INSERT INTO user_groups (user_id, group_id, role)
 SELECT id, 1, 'owner' FROM users WHERE username = 'admin'
 UNION ALL
-SELECT id, 4, 'member' FROM users WHERE username = 'admin'
+SELECT id, 2, 'member' FROM users WHERE username = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- Insert default email settings

@@ -48,10 +48,10 @@ router.get('/admin/all', requireAdmin, async (req, res) => {
         const result = await db.query(
             `SELECT u.id, u.username, u.email, u.is_admin, u.admin_created, u.email_verified,
                     u.email_verification_token, u.email_verification_expires, u.created_at,
-                    ug.group_id as subscription_plan_id,
-                    g.name as subscription_plan_name
+                    ug.group_id,
+                    g.name as group_name
              FROM users u
-             LEFT JOIN user_groups ug ON u.id = ug.user_id AND ug.group_id IN (2, 3, 4)
+             LEFT JOIN user_groups ug ON u.id = ug.user_id AND ug.group_id = 2
              LEFT JOIN groups g ON ug.group_id = g.id
              ORDER BY u.created_at DESC`
         );
@@ -102,27 +102,14 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             GROUP BY current_status
         `);
 
-        // Get subscription counts (Free Plan: id 2, Starter Plan: id 3, Pro Plan: id 4)
-        const freePlanResult = await db.query(`
-            SELECT COUNT(DISTINCT user_id) as count
-            FROM user_groups
-            WHERE group_id = 2
+        // Get groups with user counts
+        const groupsResult = await db.query(`
+            SELECT g.id, g.name, COUNT(DISTINCT ug.user_id) as user_count
+            FROM groups g
+            LEFT JOIN user_groups ug ON g.id = ug.group_id
+            GROUP BY g.id, g.name
+            ORDER BY g.id
         `);
-        const freePlan = parseInt(freePlanResult.rows[0]?.count) || 0;
-
-        const starterPlanResult = await db.query(`
-            SELECT COUNT(DISTINCT user_id) as count
-            FROM user_groups
-            WHERE group_id = 3
-        `);
-        const starterPlan = parseInt(starterPlanResult.rows[0]?.count) || 0;
-
-        const proPlanResult = await db.query(`
-            SELECT COUNT(DISTINCT user_id) as count
-            FROM user_groups
-            WHERE group_id = 4
-        `);
-        const proPlan = parseInt(proPlanResult.rows[0]?.count) || 0;
 
         res.json({
             totalMonitors,
@@ -132,9 +119,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
             totalUsers,
             verifiedUsers,
             unverifiedUsers,
-            freePlan,
-            starterPlan,
-            proPlan,
+            groupsStats: groupsResult.rows || [],
             monitorsByStatus: statusResult.rows || []
         });
     } catch (error) {
@@ -149,10 +134,8 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
 router.get('/admin/:id', requireAdmin, async (req, res) => {
     try {
         const result = await db.query(
-            `SELECT u.id, u.username, u.email, u.is_admin, u.email_verified, u.force_password_reset, u.force_username_change, u.created_at,
-                    ug.group_id as subscription_plan_id
+            `SELECT u.id, u.username, u.email, u.is_admin, u.email_verified, u.force_password_reset, u.force_username_change, u.created_at
              FROM users u
-             LEFT JOIN user_groups ug ON u.id = ug.user_id AND ug.group_id IN (2, 3, 4)
              WHERE u.id = $1`,
             [req.params.id]
         );
@@ -221,7 +204,7 @@ router.post('/admin/create', requireAdmin, async (req, res) => {
 
         const user = result.rows[0];
 
-        // Assign user to Free Plan (id: 2) by default
+        // Assign user to Member group (id: 2) by default
         const role = 'member';
 
         try {
@@ -230,7 +213,7 @@ router.post('/admin/create', requireAdmin, async (req, res) => {
                 [user.id, role]
             );
         } catch (error) {
-            console.error('Failed to assign user to Free Plan:', error);
+            console.error('Failed to assign user to Member group:', error);
             // Don't fail user creation if group assignment fails
         }
 
@@ -383,59 +366,6 @@ router.delete('/admin/:id', requireAdmin, async (req, res) => {
     } catch (error) {
         console.error('Delete user error:', error);
         res.status(500).json({ error: 'Failed to delete user' });
-    }
-});
-
-// Change user subscription plan (admin endpoint)
-router.put('/admin/:id/subscription', requireAdmin, async (req, res) => {
-    try {
-        const userId = parseInt(req.params.id);
-        const { subscriptionPlanId } = req.body;
-
-        // Validate subscription plan ID (2 = Free Plan, 3 = Starter Plan, 4 = Pro Plan)
-        if (![2, 3, 4].includes(subscriptionPlanId)) {
-            return res.status(400).json({ error: 'Invalid subscription plan. Must be 2 (Free), 3 (Starter), or 4 (Pro)' });
-        }
-
-        // Check if user exists and get verification status
-        const userCheck = await db.query('SELECT id, username, email_verified FROM users WHERE id = $1', [userId]);
-        if (userCheck.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Check if email is verified for paid plans
-        if ([3, 4].includes(subscriptionPlanId) && !userCheck.rows[0].email_verified) {
-            return res.status(403).json({ error: 'User must verify their email before subscribing to paid plans' });
-        }
-
-        // Remove user from current subscription plans (keep Admin group if they have it)
-        await db.query(
-            'DELETE FROM user_groups WHERE user_id = $1 AND group_id IN (2, 3, 4)',
-            [userId]
-        );
-
-        // Add user to new subscription plan
-        await db.query(
-            'INSERT INTO user_groups (user_id, group_id, role) VALUES ($1, $2, $3)',
-            [userId, subscriptionPlanId, 'member']
-        );
-
-        // Get plan name for response
-        const planNames = {
-            2: 'Free Plan',
-            3: 'Starter Plan',
-            4: 'Pro Plan'
-        };
-
-        res.json({
-            message: 'Subscription updated successfully',
-            userId: userId,
-            username: userCheck.rows[0].username,
-            newPlan: planNames[subscriptionPlanId]
-        });
-    } catch (error) {
-        console.error('Update subscription error:', error);
-        res.status(500).json({ error: 'Failed to update subscription' });
     }
 });
 

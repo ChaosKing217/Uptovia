@@ -102,9 +102,7 @@ import {
     resendVerificationEmail,
     resendSetupEmail,
     bulkResendVerification,
-    bulkResendSetup,
-    showChangeSubscriptionModal,
-    handleChangeSubscription
+    bulkResendSetup
 } from './users.js';
 
 import { loadDashboard } from './dashboard.js';
@@ -213,8 +211,6 @@ window.resendVerificationEmail = resendVerificationEmail;
 window.resendSetupEmail = resendSetupEmail;
 window.bulkResendVerification = bulkResendVerification;
 window.bulkResendSetup = bulkResendSetup;
-window.showChangeSubscriptionModal = showChangeSubscriptionModal;
-window.handleChangeSubscription = handleChangeSubscription;
 
 // Group Management Functions
 window.showAddGroupModal = showAddGroupModal;

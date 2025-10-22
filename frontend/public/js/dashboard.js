@@ -27,10 +27,8 @@ export async function loadDashboard() {
         // Update tags statistics
         document.getElementById('statTotalTags').textContent = data.totalTags;
 
-        // Update subscription statistics
-        document.getElementById('statFreePlan').textContent = data.freePlan || 0;
-        document.getElementById('statStarterPlan').textContent = data.starterPlan || 0;
-        document.getElementById('statProPlan').textContent = data.proPlan || 0;
+        // Render groups with user counts
+        renderGroupsStats(data.groupsStats);
 
         // Render monitors by status
         renderMonitorStatus(data.monitorsByStatus);
@@ -40,6 +38,28 @@ export async function loadDashboard() {
         console.error('Dashboard load error:', error);
         showToast('Load Failed', error.message, 'error');
     }
+}
+
+// ============================================
+// RENDER GROUPS STATS
+// ============================================
+function renderGroupsStats(groups) {
+    const groupsList = document.getElementById('groupsStatsList');
+
+    if (!groups || groups.length === 0) {
+        groupsList.innerHTML = '<div style="text-align: center; padding: var(--space-4); color: var(--text-secondary);">No groups found</div>';
+        return;
+    }
+
+    groupsList.innerHTML = groups.map(group => {
+        const count = parseInt(group.user_count || 0);
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--text-secondary);">${group.name}</span>
+                <span style="font-size: var(--text-xl); font-weight: 700;">${count}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 // ============================================

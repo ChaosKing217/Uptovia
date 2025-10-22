@@ -4,48 +4,34 @@ const { verifyAPIKey, verifyToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Helper function to get user's subscription plan limits
-async function getUserPlanLimits(userId) {
+// Helper function to check if user can create tags
+async function canUserCreateTag(userId) {
     try {
-        // Check if user is admin (admins have no limits)
-        const adminCheck = await db.query(
-            'SELECT is_admin FROM users WHERE id = $1',
+        const userCheck = await db.query(
+            'SELECT is_admin, email_verified FROM users WHERE id = $1',
             [userId]
         );
 
-        if (adminCheck.rows.length > 0 && adminCheck.rows[0].is_admin) {
-            return { maxMonitors: -1, maxTags: -1, planName: 'Admin' };
+        if (userCheck.rows.length === 0) {
+            return { allowed: false, reason: 'User not found' };
         }
 
-        // Get user's subscription plan (Free Plan: id 2, Starter Plan: id 3, Pro Plan: id 4)
-        const planResult = await db.query(
-            `SELECT group_id FROM user_groups
-             WHERE user_id = $1 AND group_id IN (2, 3, 4)
-             ORDER BY group_id DESC LIMIT 1`,
-            [userId]
-        );
+        const user = userCheck.rows[0];
 
-        if (planResult.rows.length === 0) {
-            // Default to Free Plan if no subscription found
-            return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
+        // Admins can always create tags
+        if (user.is_admin) {
+            return { allowed: true };
         }
 
-        const groupId = planResult.rows[0].group_id;
-
-        // Return limits based on plan
-        switch (groupId) {
-            case 2: // Free Plan
-                return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
-            case 3: // Starter Plan
-                return { maxMonitors: 10, maxTags: 5, planName: 'Starter Plan' };
-            case 4: // Pro Plan
-                return { maxMonitors: -1, maxTags: -1, planName: 'Pro Plan' }; // -1 = unlimited
-            default:
-                return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
+        // Regular users must verify email first
+        if (!user.email_verified) {
+            return { allowed: false, reason: 'Email verification required' };
         }
+
+        return { allowed: true };
     } catch (error) {
-        console.error('Error getting plan limits:', error);
-        return { maxMonitors: 5, maxTags: 2, planName: 'Free Plan' };
+        console.error('Error checking user permissions:', error);
+        return { allowed: false, reason: 'Permission check failed' };
     }
 }
 
@@ -127,23 +113,10 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Name is required' });
         }
 
-        // Check subscription limits before creating tag
-        const limits = await getUserPlanLimits(req.userId);
-
-        // Count existing tags for this user
-        const countResult = await db.query(
-            'SELECT COUNT(*) as count FROM tags WHERE user_id = $1',
-            [req.userId]
-        );
-        const currentTagCount = parseInt(countResult.rows[0].count);
-
-        // Check if user has reached their limit (unlimited = -1)
-        if (limits.maxTags !== -1 && currentTagCount >= limits.maxTags) {
-            return res.status(403).json({
-                error: `Tag limit reached. Your ${limits.planName} allows a maximum of ${limits.maxTags} tags.`,
-                limit: limits.maxTags,
-                current: currentTagCount
-            });
+        // Check if user can create tags (email verification required for non-admins)
+        const permission = await canUserCreateTag(req.userId);
+        if (!permission.allowed) {
+            return res.status(403).json({ error: permission.reason });
         }
 
         // If groupId is provided, check user has access
