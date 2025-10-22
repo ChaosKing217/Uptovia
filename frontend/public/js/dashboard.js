@@ -11,32 +11,91 @@ import { showToast } from './ui.js';
 export async function loadDashboard() {
     try {
         console.log('Loading dashboard...');
+
+        // Check if dashboard view is visible
+        const dashboardView = document.getElementById('dashboardView');
+        if (!dashboardView || !dashboardView.classList.contains('active')) {
+            console.warn('Dashboard view is not active, skipping load');
+            return;
+        }
+
         const data = await apiRequest('/users/admin/stats');
         console.log('Dashboard data received:', data);
 
+        if (!data) {
+            console.error('No data received from API');
+            showToast('Load Failed', 'No data received from server', 'error');
+            return;
+        }
+
         // Update monitor statistics
-        document.getElementById('statTotalMonitors').textContent = data.totalMonitors;
-        document.getElementById('statActiveMonitors').textContent = data.activeMonitors;
-        document.getElementById('statPausedMonitors').textContent = data.pausedMonitors;
+        const statTotalMonitors = document.getElementById('statTotalMonitors');
+        const statActiveMonitors = document.getElementById('statActiveMonitors');
+        const statPausedMonitors = document.getElementById('statPausedMonitors');
+
+        if (statTotalMonitors) {
+            statTotalMonitors.textContent = data.totalMonitors || 0;
+        } else {
+            console.error('statTotalMonitors element not found - dashboard may not be rendered');
+            return;
+        }
+
+        if (statActiveMonitors) {
+            statActiveMonitors.textContent = data.activeMonitors || 0;
+        } else {
+            console.warn('statActiveMonitors element not found');
+        }
+
+        if (statPausedMonitors) {
+            statPausedMonitors.textContent = data.pausedMonitors || 0;
+        } else {
+            console.warn('statPausedMonitors element not found');
+        }
 
         // Update user statistics
-        document.getElementById('statTotalUsers').textContent = data.totalUsers;
-        document.getElementById('statVerifiedUsers').textContent = data.verifiedUsers;
-        document.getElementById('statUnverifiedUsers').textContent = data.unverifiedUsers;
+        const statTotalUsers = document.getElementById('statTotalUsers');
+        const statVerifiedUsers = document.getElementById('statVerifiedUsers');
+        const statUnverifiedUsers = document.getElementById('statUnverifiedUsers');
+
+        if (statTotalUsers) {
+            statTotalUsers.textContent = data.totalUsers || 0;
+        } else {
+            console.warn('statTotalUsers element not found');
+        }
+
+        if (statVerifiedUsers) {
+            statVerifiedUsers.textContent = data.verifiedUsers || 0;
+        } else {
+            console.warn('statVerifiedUsers element not found');
+        }
+
+        if (statUnverifiedUsers) {
+            statUnverifiedUsers.textContent = data.unverifiedUsers || 0;
+        } else {
+            console.warn('statUnverifiedUsers element not found');
+        }
 
         // Update tags statistics
-        document.getElementById('statTotalTags').textContent = data.totalTags;
+        const statTotalTags = document.getElementById('statTotalTags');
+        if (statTotalTags) {
+            statTotalTags.textContent = data.totalTags || 0;
+        } else {
+            console.warn('statTotalTags element not found');
+        }
 
         // Render groups with user counts
+        console.log('Groups stats data:', data.groupsStats);
         renderGroupsStats(data.groupsStats);
 
         // Render monitors by status
+        console.log('Monitor status data:', data.monitorsByStatus);
         renderMonitorStatus(data.monitorsByStatus);
 
         console.log('Dashboard loaded successfully');
     } catch (error) {
         console.error('Dashboard load error:', error);
-        showToast('Load Failed', error.message, 'error');
+        console.error('Error stack:', error.stack);
+        showToast('Load Failed', error.message || 'Unknown error occurred', 'error');
     }
 }
 
@@ -45,6 +104,11 @@ export async function loadDashboard() {
 // ============================================
 function renderGroupsStats(groups) {
     const groupsList = document.getElementById('groupsStatsList');
+
+    if (!groupsList) {
+        console.error('groupsStatsList element not found');
+        return;
+    }
 
     if (!groups || groups.length === 0) {
         groupsList.innerHTML = '<div style="text-align: center; padding: var(--space-4); color: var(--text-secondary);">No groups found</div>';
@@ -55,11 +119,18 @@ function renderGroupsStats(groups) {
         const count = parseInt(group.user_count || 0);
         return `
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: var(--text-secondary);">${group.name}</span>
+                <span style="color: var(--text-secondary);">${escapeHtml(group.name)}</span>
                 <span style="font-size: var(--text-xl); font-weight: 700;">${count}</span>
             </div>
         `;
     }).join('');
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // ============================================
@@ -67,6 +138,11 @@ function renderGroupsStats(groups) {
 // ============================================
 function renderMonitorStatus(statuses) {
     const statusList = document.getElementById('monitorStatusList');
+
+    if (!statusList) {
+        console.error('monitorStatusList element not found');
+        return;
+    }
 
     if (!statuses || statuses.length === 0) {
         statusList.innerHTML = '<div style="text-align: center; padding: var(--space-4); color: var(--text-secondary);">No monitors found</div>';

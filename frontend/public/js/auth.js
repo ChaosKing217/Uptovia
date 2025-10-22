@@ -37,7 +37,16 @@ export async function loadTurnstileConfig() {
 
 // Initialize Turnstile widgets
 function initializeTurnstile() {
-    if (!turnstileConfig.enabled || !turnstileConfig.siteKey) return;
+    if (!turnstileConfig.enabled || !turnstileConfig.siteKey) {
+        console.log('Turnstile not enabled or siteKey missing');
+        return;
+    }
+
+    // Validate siteKey is a string
+    if (typeof turnstileConfig.siteKey !== 'string') {
+        console.error('Turnstile siteKey must be a string, got:', typeof turnstileConfig.siteKey);
+        return;
+    }
 
     // Wait for Turnstile API to load
     const checkTurnstile = setInterval(() => {
@@ -48,11 +57,15 @@ function initializeTurnstile() {
             const loginContainer = document.getElementById('loginTurnstile');
             if (loginContainer && !loginTurnstileWidgetId) {
                 loginContainer.innerHTML = ''; // Clear any existing content
-                loginTurnstileWidgetId = window.turnstile.render('#loginTurnstile', {
-                    sitekey: turnstileConfig.siteKey,
-                    theme: 'light',
-                    size: 'normal'
-                });
+                try {
+                    loginTurnstileWidgetId = window.turnstile.render('#loginTurnstile', {
+                        sitekey: turnstileConfig.siteKey,
+                        theme: 'light',
+                        size: 'normal'
+                    });
+                } catch (error) {
+                    console.error('Failed to render login Turnstile:', error);
+                }
             }
 
             // Render register Turnstile
