@@ -9,6 +9,52 @@ const { verifyToken, verifyAPIKey } = require('../middleware/auth');
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
 
+// Verify Cloudflare Turnstile token
+async function verifyTurnstileToken(token, remoteip) {
+    try {
+        // Get Turnstile settings
+        const settingsResult = await db.query(
+            'SELECT secret_key, is_enabled FROM turnstile_settings ORDER BY id DESC LIMIT 1'
+        );
+
+        // If Turnstile is not enabled, skip verification
+        if (settingsResult.rows.length === 0 || !settingsResult.rows[0].is_enabled) {
+            return { success: true, message: 'Turnstile not enabled' };
+        }
+
+        const secretKey = settingsResult.rows[0].secret_key;
+
+        // If no token provided but Turnstile is enabled
+        if (!token) {
+            return { success: false, message: 'Turnstile verification required' };
+        }
+
+        // Verify token with Cloudflare
+        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                secret: secretKey,
+                response: token,
+                remoteip: remoteip
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            return { success: true, message: 'Verification successful' };
+        } else {
+            return { success: false, message: 'Turnstile verification failed', errors: data['error-codes'] };
+        }
+    } catch (error) {
+        console.error('Turnstile verification error:', error);
+        return { success: false, message: 'Turnstile verification error' };
+    }
+}
+
 // Support both API key and JWT authentication
 const authenticate = (req, res, next) => {
     const apiKey = req.headers['x-api-key'];
@@ -26,7 +72,13 @@ const authenticate = (req, res, next) => {
 // Register new user
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, email } = req.body;
+        const { username, password, email, turnstileToken } = req.body;
+
+        // Verify Turnstile token
+        const turnstileVerification = await verifyTurnstileToken(turnstileToken, req.ip);
+        if (!turnstileVerification.success) {
+            return res.status(400).json({ error: turnstileVerification.message || 'Bot verification failed' });
+        }
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password required' });
@@ -134,7 +186,13 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, turnstileToken } = req.body;
+
+        // Verify Turnstile token
+        const turnstileVerification = await verifyTurnstileToken(turnstileToken, req.ip);
+        if (!turnstileVerification.success) {
+            return res.status(400).json({ error: turnstileVerification.message || 'Bot verification failed' });
+        }
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Username or email and password required' });
