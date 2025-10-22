@@ -18,16 +18,34 @@ export async function loadTurnstileConfig() {
     try {
         const response = await fetch(`${API_BASE}/settings/turnstile/public`);
         const data = await response.json();
-        turnstileConfig = data;
+
+        console.log('Turnstile config received:', data);
+        console.log('siteKey type:', typeof data.siteKey);
+        console.log('siteKey value:', data.siteKey);
+
+        // Validate the configuration
+        if (data.enabled && (!data.siteKey || typeof data.siteKey !== 'string' || data.siteKey.trim() === '')) {
+            console.warn('Turnstile is enabled but siteKey is invalid, disabling Turnstile');
+            turnstileConfig = { enabled: false, siteKey: null };
+        } else {
+            turnstileConfig = data;
+        }
 
         // Show/hide Turnstile widgets based on configuration
         if (turnstileConfig.enabled && turnstileConfig.siteKey) {
-            document.getElementById('loginTurnstile').style.display = 'block';
-            document.getElementById('registerTurnstile').style.display = 'block';
+            const loginTurnstile = document.getElementById('loginTurnstile');
+            const registerTurnstile = document.getElementById('registerTurnstile');
+
+            if (loginTurnstile) loginTurnstile.style.display = 'block';
+            if (registerTurnstile) registerTurnstile.style.display = 'block';
+
             initializeTurnstile();
         } else {
-            document.getElementById('loginTurnstile').style.display = 'none';
-            document.getElementById('registerTurnstile').style.display = 'none';
+            const loginTurnstile = document.getElementById('loginTurnstile');
+            const registerTurnstile = document.getElementById('registerTurnstile');
+
+            if (loginTurnstile) loginTurnstile.style.display = 'none';
+            if (registerTurnstile) registerTurnstile.style.display = 'none';
         }
     } catch (error) {
         console.error('Failed to load Turnstile config:', error);

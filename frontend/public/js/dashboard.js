@@ -19,6 +19,9 @@ export async function loadDashboard() {
             return;
         }
 
+        // Give a small delay to ensure DOM is rendered
+        await new Promise(resolve => setTimeout(resolve, 50));
+
         const data = await apiRequest('/users/admin/stats');
         console.log('Dashboard data received:', data);
 
@@ -33,12 +36,20 @@ export async function loadDashboard() {
         const statActiveMonitors = document.getElementById('statActiveMonitors');
         const statPausedMonitors = document.getElementById('statPausedMonitors');
 
-        if (statTotalMonitors) {
-            statTotalMonitors.textContent = data.totalMonitors || 0;
-        } else {
+        console.log('Elements found:', {
+            statTotalMonitors: !!statTotalMonitors,
+            statActiveMonitors: !!statActiveMonitors,
+            statPausedMonitors: !!statPausedMonitors
+        });
+
+        if (!statTotalMonitors) {
             console.error('statTotalMonitors element not found - dashboard may not be rendered');
+            console.error('Dashboard view active:', dashboardView.classList.contains('active'));
+            console.error('Dashboard view HTML:', dashboardView.innerHTML.substring(0, 200));
             return;
         }
+
+        statTotalMonitors.textContent = data.totalMonitors || 0;
 
         if (statActiveMonitors) {
             statActiveMonitors.textContent = data.activeMonitors || 0;

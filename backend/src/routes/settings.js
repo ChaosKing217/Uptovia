@@ -49,7 +49,17 @@ router.get('/turnstile', verifyToken, requireAdmin, async (req, res) => {
 // Save Turnstile settings
 router.post('/turnstile', verifyToken, requireAdmin, async (req, res) => {
     try {
-        const { isEnabled, siteKey, secretKey } = req.body;
+        let { isEnabled, siteKey, secretKey } = req.body;
+
+        // Trim keys and convert empty strings to null
+        siteKey = siteKey?.trim() || null;
+        secretKey = secretKey?.trim() || null;
+
+        // If either key is missing but enabled, disable it
+        if (isEnabled && (!siteKey || !secretKey)) {
+            console.warn('Turnstile enabled but missing keys, forcing disabled');
+            isEnabled = false;
+        }
 
         // Check if settings exist
         const existing = await db.query('SELECT id FROM turnstile_settings LIMIT 1');
@@ -89,7 +99,11 @@ router.get('/turnstile/public', async (req, res) => {
             'SELECT site_key, is_enabled FROM turnstile_settings ORDER BY id DESC LIMIT 1'
         );
 
-        if (result.rows.length === 0 || !result.rows[0].is_enabled) {
+        // Return disabled if no settings, not enabled, or site_key is missing/empty
+        if (result.rows.length === 0 ||
+            !result.rows[0].is_enabled ||
+            !result.rows[0].site_key ||
+            result.rows[0].site_key.trim() === '') {
             return res.json({
                 enabled: false,
                 siteKey: null
@@ -98,7 +112,7 @@ router.get('/turnstile/public', async (req, res) => {
 
         res.json({
             enabled: true,
-            siteKey: result.rows[0].site_key
+            siteKey: result.rows[0].site_key.trim()
         });
     } catch (error) {
         console.error('Get public Turnstile config error:', error);
