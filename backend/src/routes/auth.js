@@ -74,10 +74,16 @@ router.post('/register', async (req, res) => {
     try {
         const { username, password, email, turnstileToken } = req.body;
 
-        // Verify Turnstile token
-        const turnstileVerification = await verifyTurnstileToken(turnstileToken, req.ip);
-        if (!turnstileVerification.success) {
-            return res.status(400).json({ error: turnstileVerification.message || 'Bot verification failed' });
+        // Skip Turnstile verification for iOS app requests (User-Agent contains "Uptovia" or "CFNetwork")
+        const userAgent = req.headers['user-agent'] || '';
+        const isIOSApp = userAgent.includes('Uptovia') || userAgent.includes('CFNetwork');
+
+        // Verify Turnstile token (skip for iOS app)
+        if (!isIOSApp) {
+            const turnstileVerification = await verifyTurnstileToken(turnstileToken, req.ip);
+            if (!turnstileVerification.success) {
+                return res.status(400).json({ error: turnstileVerification.message || 'Bot verification failed' });
+            }
         }
 
         if (!username || !password) {
@@ -186,22 +192,31 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     try {
-        const { username, password, turnstileToken } = req.body;
+        const { username, usernameOrEmail, password, turnstileToken } = req.body;
 
-        // Verify Turnstile token
-        const turnstileVerification = await verifyTurnstileToken(turnstileToken, req.ip);
-        if (!turnstileVerification.success) {
-            return res.status(400).json({ error: turnstileVerification.message || 'Bot verification failed' });
+        // Support both 'username' and 'usernameOrEmail' field names
+        const userIdentifier = usernameOrEmail || username;
+
+        // Skip Turnstile verification for iOS app requests (User-Agent contains "Uptovia" or "CFNetwork")
+        const userAgent = req.headers['user-agent'] || '';
+        const isIOSApp = userAgent.includes('Uptovia') || userAgent.includes('CFNetwork');
+
+        // Verify Turnstile token (skip for iOS app)
+        if (!isIOSApp) {
+            const turnstileVerification = await verifyTurnstileToken(turnstileToken, req.ip);
+            if (!turnstileVerification.success) {
+                return res.status(400).json({ error: turnstileVerification.message || 'Bot verification failed' });
+            }
         }
 
-        if (!username || !password) {
+        if (!userIdentifier || !password) {
             return res.status(400).json({ error: 'Username or email and password required' });
         }
 
         // Get user by username or email
         const result = await db.query(
             'SELECT id, username, password_hash, api_key, force_password_reset, force_username_change, email_verified FROM users WHERE username = $1 OR (email IS NOT NULL AND email = $1)',
-            [username]
+            [userIdentifier]
         );
 
         if (result.rows.length === 0) {
