@@ -713,3 +713,20 @@ body.dark-theme .toggle-slider::before {
 .tag-option .tag-name {
     display: inline-block;
 }
+
+/* ============================================
+   SMALL SPINNER FOR AVAILABILITY CHECKS
+   ============================================ */
+
+.spinner-small {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #007AFF;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

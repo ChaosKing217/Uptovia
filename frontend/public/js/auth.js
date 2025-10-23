@@ -839,3 +839,141 @@ export function checkChangePasswordMatch() {
         messageEl.textContent = '✗ Passwords do not match';
     }
 }
+
+// ============================================
+// AVAILABILITY CHECKS
+// ============================================
+
+let usernameCheckTimeout = null;
+let emailCheckTimeout = null;
+
+export async function checkUsernameAvailability() {
+    const usernameInput = document.getElementById('registerUsername');
+    const username = usernameInput.value.trim();
+    const spinner = document.getElementById('usernameCheckSpinner');
+    const icon = document.getElementById('usernameCheckIcon');
+    const message = document.getElementById('usernameAvailabilityMessage');
+
+    // Clear previous timeout
+    if (usernameCheckTimeout) {
+        clearTimeout(usernameCheckTimeout);
+    }
+
+    // Reset UI if empty or too short
+    if (username.length < 3) {
+        spinner.style.display = 'none';
+        icon.style.display = 'none';
+        message.style.display = 'none';
+        usernameInput.style.borderColor = '';
+        return;
+    }
+
+    // Show spinner
+    spinner.style.display = 'block';
+    icon.style.display = 'none';
+    message.style.display = 'none';
+
+    // Debounce the check (500ms delay)
+    usernameCheckTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`${API_BASE}/auth/check-username/${encodeURIComponent(username)}`);
+            const data = await response.json();
+
+            spinner.style.display = 'none';
+            icon.style.display = 'block';
+            message.style.display = 'block';
+
+            if (data.available) {
+                icon.textContent = '✓';
+                icon.style.color = '#10B981';
+                message.textContent = 'Username available';
+                message.style.color = '#10B981';
+                usernameInput.style.borderColor = '#10B981';
+            } else {
+                icon.textContent = '✗';
+                icon.style.color = '#EF4444';
+                message.textContent = 'Username already taken';
+                message.style.color = '#EF4444';
+                usernameInput.style.borderColor = '#EF4444';
+            }
+        } catch (error) {
+            console.error('Error checking username availability:', error);
+            spinner.style.display = 'none';
+            icon.style.display = 'none';
+            message.style.display = 'none';
+            usernameInput.style.borderColor = '';
+        }
+    }, 500);
+}
+
+export async function checkEmailAvailability() {
+    const emailInput = document.getElementById('registerEmail');
+    const email = emailInput.value.trim();
+    const spinner = document.getElementById('emailCheckSpinner');
+    const icon = document.getElementById('emailCheckIcon');
+    const message = document.getElementById('emailAvailabilityMessage');
+
+    // Clear previous timeout
+    if (emailCheckTimeout) {
+        clearTimeout(emailCheckTimeout);
+    }
+
+    // Reset UI if empty
+    if (email.length === 0) {
+        spinner.style.display = 'none';
+        icon.style.display = 'none';
+        message.style.display = 'none';
+        emailInput.style.borderColor = '';
+        return;
+    }
+
+    // Validate email format first
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        spinner.style.display = 'none';
+        icon.style.display = 'none';
+        message.style.display = 'none';
+        return; // Don't check availability if format is invalid
+    }
+
+    // Show spinner
+    spinner.style.display = 'block';
+    icon.style.display = 'none';
+    message.style.display = 'none';
+
+    // Debounce the check (500ms delay)
+    emailCheckTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`${API_BASE}/auth/check-email/${encodeURIComponent(email)}`);
+            const data = await response.json();
+
+            spinner.style.display = 'none';
+            icon.style.display = 'block';
+            message.style.display = 'block';
+
+            if (data.available) {
+                icon.textContent = '✓';
+                icon.style.color = '#10B981';
+                message.textContent = 'Email available';
+                message.style.color = '#10B981';
+                emailInput.style.borderColor = '#10B981';
+            } else {
+                icon.textContent = '✗';
+                icon.style.color = '#EF4444';
+                message.textContent = 'Email already registered';
+                message.style.color = '#EF4444';
+                emailInput.style.borderColor = '#EF4444';
+            }
+        } catch (error) {
+            console.error('Error checking email availability:', error);
+            spinner.style.display = 'none';
+            icon.style.display = 'none';
+            message.style.display = 'none';
+            emailInput.style.borderColor = '';
+        }
+    }, 500);
+}
+
+// Make functions available globally for HTML onclick
+window.checkUsernameAvailability = checkUsernameAvailability;
+window.checkEmailAvailability = checkEmailAvailability;

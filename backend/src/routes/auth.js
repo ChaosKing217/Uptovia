@@ -1086,6 +1086,48 @@ router.post('/change-username', verifyToken, async (req, res) => {
     }
 });
 
+// Check username availability
+router.get('/check-username/:username', async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        if (!username || username.length < 3) {
+            return res.json({ available: false, reason: 'Username must be at least 3 characters' });
+        }
+
+        const result = await db.query(
+            'SELECT id FROM users WHERE username = $1',
+            [username]
+        );
+
+        res.json({ available: result.rows.length === 0 });
+    } catch (error) {
+        console.error('Check username error:', error);
+        res.status(500).json({ error: 'Failed to check username availability' });
+    }
+});
+
+// Check email availability
+router.get('/check-email/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+
+        if (!email || !isValidEmail(email)) {
+            return res.json({ available: false, reason: 'Invalid email format' });
+        }
+
+        const result = await db.query(
+            'SELECT id FROM users WHERE email = $1',
+            [email]
+        );
+
+        res.json({ available: result.rows.length === 0 });
+    } catch (error) {
+        console.error('Check email error:', error);
+        res.status(500).json({ error: 'Failed to check email availability' });
+    }
+});
+
 // Helper function to validate email
 function isValidEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
