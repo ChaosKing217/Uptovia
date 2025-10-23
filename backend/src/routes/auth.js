@@ -175,12 +175,14 @@ router.post('/register', async (req, res) => {
         const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' });
 
         res.json({
-            token,
+            message: 'Registration successful. Please check your email to verify your account.',
             user: {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                apiKey: user.api_key
+                apiKey: user.api_key,
+                emailVerified: false,
+                isAdmin: false
             }
         });
     } catch (error) {
@@ -776,7 +778,7 @@ router.get('/verify-email', async (req, res) => {
                     <h1>Your email has been verified!</h1>
                     <p>Thank you for verifying your email address. Your Uptovia account is now fully activated and you can access all features.</p>
                     <p style="color: #1d1d1f; font-weight: 500; margin-bottom: 24px;">We've sent you a welcome email with tips to get started!</p>
-                    <a href="/" class="button">Go to Dashboard</a>
+                    <a href="${process.env.APP_URL || 'http://localhost:3000'}" class="button">Go to Dashboard</a>
                 </div>
             </body>
             </html>

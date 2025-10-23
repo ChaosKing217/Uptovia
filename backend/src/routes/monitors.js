@@ -25,7 +25,7 @@ async function canUserCreateMonitor(userId) {
 
         // Regular users must verify email first
         if (!user.email_verified) {
-            return { allowed: false, reason: 'Email verification required' };
+            return { allowed: false, reason: 'Email verification required. You can resend the verification email from Account Settings.' };
         }
 
         return { allowed: true };
