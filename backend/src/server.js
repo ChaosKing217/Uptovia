@@ -68,7 +68,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, async () => {
-    console.log(`🚀 Uptime Monitor Backend Server running on port ${PORT}`);
+    console.log(`🚀 Uptovia Backend Server running on port ${PORT}`);
     console.log(`📊 Web Dashboard: http://localhost:${PORT}`);
     console.log(`🔌 API Endpoint: http://localhost:${PORT}/api`);
 

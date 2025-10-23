@@ -577,7 +577,7 @@ router.get('/verify-email', async (req, res) => {
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Verification Failed - Uptime Monitor</title>
+                    <title>Verification Failed - Uptovia</title>
                     <style>
                         * {
                             margin: 0;
@@ -688,7 +688,7 @@ router.get('/verify-email', async (req, res) => {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Email Verified - Uptime Monitor</title>
+                <title>Email Verified - Uptovia</title>
                 <style>
                     * {
                         margin: 0;
@@ -774,7 +774,7 @@ router.get('/verify-email', async (req, res) => {
                     <div class="icon">✅</div>
                     <div class="success-badge">Email Verified</div>
                     <h1>Your email has been verified!</h1>
-                    <p>Thank you for verifying your email address. Your Uptime Monitor account is now fully activated and you can access all features.</p>
+                    <p>Thank you for verifying your email address. Your Uptovia account is now fully activated and you can access all features.</p>
                     <p style="color: #1d1d1f; font-weight: 500; margin-bottom: 24px;">We've sent you a welcome email with tips to get started!</p>
                     <a href="/" class="button">Go to Dashboard</a>
                 </div>

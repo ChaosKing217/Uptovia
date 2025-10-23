@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
                 smtp_secure BOOLEAN DEFAULT false,
                 smtp_user VARCHAR(255),
                 smtp_password TEXT,
-                smtp_from VARCHAR(255) DEFAULT 'Uptime Monitor <noreply@monitor.local>',
+                smtp_from VARCHAR(255) DEFAULT 'Uptovia <noreply@monitor.local>',
                 is_configured BOOLEAN DEFAULT false,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_by INTEGER REFERENCES users(id)

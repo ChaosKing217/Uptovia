@@ -4,7 +4,7 @@ class EmailService {
     constructor() {
         this.transporter = null;
         this.isConfigured = false;
-        this.fromAddress = 'Uptime Monitor <noreply@monitor.local>';
+        this.fromAddress = 'Uptovia <noreply@monitor.local>';
     }
 
     async initialize() {
@@ -49,7 +49,7 @@ class EmailService {
                 }
             });
 
-            this.fromAddress = process.env.SMTP_FROM || 'Uptime Monitor <noreply@monitor.local>';
+            this.fromAddress = process.env.SMTP_FROM || 'Uptovia <noreply@monitor.local>';
             this.isConfigured = true;
             console.log('✅ Email service initialized from environment');
 
@@ -85,7 +85,7 @@ class EmailService {
                 }
             });
 
-            this.fromAddress = settings.smtp_from || 'Uptime Monitor <noreply@monitor.local>';
+            this.fromAddress = settings.smtp_from || 'Uptovia <noreply@monitor.local>';
             this.isConfigured = true;
             console.log('✅ Email service initialized from database');
 
@@ -117,7 +117,7 @@ class EmailService {
         const mailOptions = {
             from: this.fromAddress,
             to: email,
-            subject: 'Password Reset Request - Uptime Monitor',
+            subject: 'Password Reset Request - Uptovia',
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -200,7 +200,7 @@ class EmailService {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>🔍 Uptime Monitor</h1>
+                            <h1>🔍 Uptovia</h1>
                             <p style="margin: 10px 0 0 0; opacity: 0.9;">Password Reset Request</p>
                         </div>
                         <div class="content">
@@ -210,7 +210,7 @@ class EmailService {
 
                             <p>Hello <strong>${username}</strong>,</p>
 
-                            <p>We received a request to reset the password for your Uptime Monitor account. If you made this request, click the button below to create a new password:</p>
+                            <p>We received a request to reset the password for your Uptovia account. If you made this request, click the button below to create a new password:</p>
 
                             <center>
                                 <a href="${resetUrl}" class="button">Reset Password Now</a>
@@ -232,10 +232,10 @@ class EmailService {
                             <p style="color: #86868b; font-size: 14px; margin-top: 30px;">If you didn't request a password reset, someone might be trying to access your account. Please contact your system administrator immediately.</p>
 
                             <p style="margin-top: 30px;">Best regards,<br>
-                            <strong>Uptime Monitor Team</strong></p>
+                            <strong>Uptovia Team</strong></p>
                         </div>
                         <div class="footer">
-                            <p>This is an automated email from Uptime Monitor.<br>
+                            <p>This is an automated email from Uptovia.<br>
                             Please do not reply to this email.<br>
                             Sent to: <strong>${email}</strong></p>
                         </div>
@@ -244,11 +244,11 @@ class EmailService {
                 </html>
             `,
             text: `
-🔐 Password Reset Request - Uptime Monitor
+🔐 Password Reset Request - Uptovia
 
 Hello ${username},
 
-We received a request to reset the password for your Uptime Monitor account.
+We received a request to reset the password for your Uptovia account.
 
 Click the link below to reset your password:
 ${resetUrl}
@@ -262,10 +262,10 @@ SECURITY INFORMATION:
 If you didn't request a password reset, someone might be trying to access your account. Please contact your system administrator immediately.
 
 Best regards,
-Uptime Monitor Team
+Uptovia Team
 
 ---
-This is an automated security email from Uptime Monitor.
+This is an automated security email from Uptovia.
 Please do not reply to this email.
             `
         };
@@ -290,7 +290,7 @@ Please do not reply to this email.
         const mailOptions = {
             from: this.fromAddress,
             to: email,
-            subject: 'Set Up Your Account - Uptime Monitor',
+            subject: 'Set Up Your Account - Uptovia',
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -373,7 +373,7 @@ Please do not reply to this email.
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>🔍 Uptime Monitor</h1>
+                            <h1>🔍 Uptovia</h1>
                             <p style="margin: 10px 0 0 0; opacity: 0.9;">Account Invitation</p>
                         </div>
                         <div class="content">
@@ -383,7 +383,7 @@ Please do not reply to this email.
 
                             <p>Hello <strong>${username}</strong>,</p>
 
-                            <p>An administrator has invited you to join Uptime Monitor. To activate your account, please click the button below to verify your email and set your password:</p>
+                            <p>An administrator has invited you to join Uptovia. To activate your account, please click the button below to verify your email and set your password:</p>
 
                             <center>
                                 <a href="${setupUrl}" class="button">Set Up Account</a>
@@ -405,10 +405,10 @@ Please do not reply to this email.
                             <p style="color: #86868b; font-size: 14px; margin-top: 30px;">Your username is: <strong style="color: #1d1d1f;">${username}</strong></p>
 
                             <p style="margin-top: 30px;">Best regards,<br>
-                            <strong>Uptime Monitor Team</strong></p>
+                            <strong>Uptovia Team</strong></p>
                         </div>
                         <div class="footer">
-                            <p>This is an automated email from Uptime Monitor.<br>
+                            <p>This is an automated email from Uptovia.<br>
                             Please do not reply to this email.<br>
                             Sent to: <strong>${email}</strong></p>
                         </div>
@@ -417,11 +417,11 @@ Please do not reply to this email.
                 </html>
             `,
             text: `
-👋 Welcome to Uptime Monitor!
+👋 Welcome to Uptovia!
 
 Hello ${username},
 
-An administrator has invited you to join Uptime Monitor. To activate your account, please click the link below to verify your email and set your password:
+An administrator has invited you to join Uptovia. To activate your account, please click the link below to verify your email and set your password:
 
 ${setupUrl}
 
@@ -434,10 +434,10 @@ WHAT'S NEXT:
 Your username is: ${username}
 
 Best regards,
-Uptime Monitor Team
+Uptovia Team
 
 ---
-This is an automated email from Uptime Monitor.
+This is an automated email from Uptovia.
 Please do not reply to this email.
             `
         };
@@ -545,7 +545,7 @@ Please do not reply to this email.
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>🔍 Uptime Monitor</h1>
+                            <h1>🔍 Uptovia</h1>
                             <p style="margin: 10px 0 0 0; opacity: 0.9;">Account Created</p>
                         </div>
                         <div class="content">
@@ -555,7 +555,7 @@ Please do not reply to this email.
 
                             <p>Hello <strong>${username}</strong>,</p>
 
-                            <p>An administrator has created an Uptime Monitor account for you. To activate your account and access all features, please verify your email address by clicking the button below:</p>
+                            <p>An administrator has created an Uptovia account for you. To activate your account and access all features, please verify your email address by clicking the button below:</p>
 
                             <center>
                                 <a href="${verificationUrl}" class="button">Verify Email Address</a>
@@ -575,10 +575,10 @@ Please do not reply to this email.
                             </div>
 
                             <p style="margin-top: 30px;">Best regards,<br>
-                            <strong>Uptime Monitor Team</strong></p>
+                            <strong>Uptovia Team</strong></p>
                         </div>
                         <div class="footer">
-                            <p>This is an automated email from Uptime Monitor.<br>
+                            <p>This is an automated email from Uptovia.<br>
                             Please do not reply to this email.<br>
                             Sent to: <strong>${email}</strong></p>
                         </div>
@@ -587,11 +587,11 @@ Please do not reply to this email.
                 </html>
             `,
             text: `
-👤 Account Created - Uptime Monitor
+👤 Account Created - Uptovia
 
 Hello ${username},
 
-An administrator has created an Uptime Monitor account for you. To activate your account and access all features, please verify your email address by clicking the link below:
+An administrator has created an Uptovia account for you. To activate your account and access all features, please verify your email address by clicking the link below:
 
 ${verificationUrl}
 
@@ -602,10 +602,10 @@ IMPORTANT INFORMATION:
 - Contact your administrator if you didn't expect this account
 
 Best regards,
-Uptime Monitor Team
+Uptovia Team
 
 ---
-This is an automated email from Uptime Monitor.
+This is an automated email from Uptovia.
 Please do not reply to this email.
             `
         };
@@ -630,7 +630,7 @@ Please do not reply to this email.
         const mailOptions = {
             from: this.fromAddress,
             to: email,
-            subject: 'Verify Your Email - Uptime Monitor',
+            subject: 'Verify Your Email - Uptovia',
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -713,13 +713,13 @@ Please do not reply to this email.
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>🔍 Uptime Monitor</h1>
+                            <h1>🔍 Uptovia</h1>
                             <p style="margin: 10px 0 0 0; opacity: 0.9;">Verify Your Email Address</p>
                         </div>
                         <div class="content">
                             <div class="icon">📧</div>
 
-                            <h2 style="color: #1d1d1f; text-align: center; margin-top: 0;">Welcome to Uptime Monitor!</h2>
+                            <h2 style="color: #1d1d1f; text-align: center; margin-top: 0;">Welcome to Uptovia!</h2>
 
                             <p>Hello <strong>${username}</strong>,</p>
 
@@ -743,10 +743,10 @@ Please do not reply to this email.
                             </div>
 
                             <p style="margin-top: 30px;">Best regards,<br>
-                            <strong>Uptime Monitor Team</strong></p>
+                            <strong>Uptovia Team</strong></p>
                         </div>
                         <div class="footer">
-                            <p>This is an automated email from Uptime Monitor.<br>
+                            <p>This is an automated email from Uptovia.<br>
                             Please do not reply to this email.<br>
                             Sent to: <strong>${email}</strong></p>
                         </div>
@@ -755,7 +755,7 @@ Please do not reply to this email.
                 </html>
             `,
             text: `
-📧 Verify Your Email Address - Uptime Monitor
+📧 Verify Your Email Address - Uptovia
 
 Hello ${username},
 
@@ -770,10 +770,10 @@ IMPORTANT INFORMATION:
 - You can request a new verification link from your account settings
 
 Best regards,
-Uptime Monitor Team
+Uptovia Team
 
 ---
-This is an automated email from Uptime Monitor.
+This is an automated email from Uptovia.
 Please do not reply to this email.
             `
         };
@@ -797,7 +797,7 @@ Please do not reply to this email.
         const mailOptions = {
             from: this.fromAddress,
             to: email,
-            subject: 'Welcome to Uptime Monitor!',
+            subject: 'Welcome to Uptovia!',
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -850,13 +850,13 @@ Please do not reply to this email.
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>🔍 Welcome to Uptime Monitor!</h1>
+                            <h1>🔍 Welcome to Uptovia!</h1>
                             <p style="margin: 10px 0 0 0; opacity: 0.9;">Your account is ready</p>
                         </div>
                         <div class="content">
                             <p>Hello <strong>${username}</strong>,</p>
 
-                            <p>Thank you for verifying your email! Your Uptime Monitor is now ready to use.</p>
+                            <p>Thank you for verifying your email! Your Uptovia account is now ready to use.</p>
 
                             <h3 style="color: #1d1d1f;">What you can do:</h3>
 
@@ -882,10 +882,10 @@ Please do not reply to this email.
                             </center>
 
                             <p style="margin-top: 30px;">Best regards,<br>
-                            <strong>Uptime Monitor Team</strong></p>
+                            <strong>Uptovia Team</strong></p>
                         </div>
                         <div class="footer">
-                            <p>This is an automated email from Uptime Monitor.<br>
+                            <p>This is an automated email from Uptovia.<br>
                             Please do not reply to this email.<br>
                             Sent to: <strong>${email}</strong></p>
                         </div>
@@ -894,11 +894,11 @@ Please do not reply to this email.
                 </html>
             `,
             text: `
-🔍 Welcome to Uptime Monitor!
+🔍 Welcome to Uptovia!
 
 Hello ${username},
 
-Thank you for verifying your email! Your Uptime Monitor is now ready to use.
+Thank you for verifying your email! Your Uptovia account is now ready to use.
 
 What you can do:
 - Monitor Services: Track HTTP/HTTPS, Ping, TCP, and DNS endpoints with real-time status updates
@@ -908,10 +908,10 @@ What you can do:
 Get started by adding your first monitor!
 
 Best regards,
-Uptime Monitor Team
+Uptovia Team
 
 ---
-This is an automated email from Uptime Monitor.
+This is an automated email from Uptovia.
 Please do not reply to this email.
             `
         };
@@ -933,7 +933,7 @@ Please do not reply to this email.
         const mailOptions = {
             from: this.fromAddress,
             to: email,
-            subject: 'Test Email - Uptime Monitor',
+            subject: 'Test Email - Uptovia',
             html: `
                 <!DOCTYPE html>
                 <html>
@@ -996,7 +996,7 @@ Please do not reply to this email.
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>🔍 Uptime Monitor</h1>
+                            <h1>🔍 Uptovia</h1>
                             <p style="margin: 10px 0 0 0; opacity: 0.9;">Email Configuration Test</p>
                         </div>
                         <div class="content">
@@ -1014,7 +1014,7 @@ Please do not reply to this email.
                                 <strong>✓ Email Delivery:</strong> Operational
                             </div>
 
-                            <p>Your Uptime Monitor is now ready to send notifications for:</p>
+                            <p>Your Uptovia monitoring system is now ready to send notifications for:</p>
                             <ul style="color: #1d1d1f;">
                                 <li>Service downtime alerts</li>
                                 <li>Service recovery notifications</li>
@@ -1025,7 +1025,7 @@ Please do not reply to this email.
                             <p>If you have any questions, please contact your system administrator.</p>
                         </div>
                         <div class="footer">
-                            <p>This is an automated test email from Uptime Monitor.<br>
+                            <p>This is an automated test email from Uptovia.<br>
                             Please do not reply to this email.<br>
                             Sent to: <strong>${email}</strong></p>
                         </div>
@@ -1034,7 +1034,7 @@ Please do not reply to this email.
                 </html>
             `,
             text: `
-✅ Email Configuration Test - Uptime Monitor
+✅ Email Configuration Test - Uptovia
 
 Congratulations! Your email configuration is working perfectly.
 
@@ -1043,7 +1043,7 @@ This test email confirms that:
 - Authentication: Valid credentials
 - Email Delivery: Operational
 
-Your Uptime Monitor is now ready to send notifications.
+Your Uptovia monitoring system is now ready to send notifications.
 
 Sent to: ${email}
             `

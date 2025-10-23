@@ -360,7 +360,7 @@ export async function loadEmailSettings() {
         document.getElementById('smtpSecure').checked = settings.smtp_secure || false;
         document.getElementById('smtpUser').value = settings.smtp_user || '';
         document.getElementById('smtpPassword').value = '';
-        document.getElementById('smtpFrom').value = settings.smtp_from || 'Uptime Monitor <noreply@monitor.local>';
+        document.getElementById('smtpFrom').value = settings.smtp_from || 'Uptovia <noreply@monitor.local>';
 
         // Make password field not required if settings exist
         if (settings.is_configured) {
