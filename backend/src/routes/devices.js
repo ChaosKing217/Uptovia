@@ -1,11 +1,11 @@
 const express = require('express');
 const db = require('../services/database');
-const { verifyAPIKey } = require('../middleware/auth');
+const { verifyToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All routes require API key authentication
-router.use(verifyAPIKey);
+// All routes require authentication
+router.use(verifyToken);
 
 // Register device for push notifications
 router.post('/register', async (req, res) => {
