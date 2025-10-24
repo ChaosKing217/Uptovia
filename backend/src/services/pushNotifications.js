@@ -7,14 +7,26 @@ class PushNotificationService {
         this.isConfigured = false;
     }
 
-    initialize() {
+    async initialize() {
         try {
+            // Load settings from database
+            const result = await db.query('SELECT * FROM apns_settings WHERE is_configured = true ORDER BY id LIMIT 1');
+
+            if (result.rows.length === 0) {
+                console.log('⚠️  APNs not configured in database - push notifications disabled');
+                console.log('   Please configure APNs settings in the web dashboard under Notifications Settings');
+                this.isConfigured = false;
+                return;
+            }
+
+            const settings = result.rows[0];
+
             // Check if APNs certificates exist
             const options = {
                 token: {
-                    key: process.env.APNS_KEY_PATH || '/app/certs/AuthKey.p8',
-                    keyId: process.env.APNS_KEY_ID,
-                    teamId: process.env.APNS_TEAM_ID
+                    key: settings.apns_key_path || process.env.APNS_KEY_PATH || '/app/certs/AuthKey.p8',
+                    keyId: settings.apns_key_id || process.env.APNS_KEY_ID,
+                    teamId: settings.apns_team_id || process.env.APNS_TEAM_ID
                 },
                 production: process.env.NODE_ENV === 'production'
             };
@@ -23,9 +35,15 @@ class PushNotificationService {
             if (options.token.keyId && options.token.teamId) {
                 this.provider = new apn.Provider(options);
                 this.isConfigured = true;
+                this.bundleId = settings.apns_bundle_id;
                 console.log('✅ Push notification service initialized');
+                console.log(`   Bundle ID: ${this.bundleId}`);
+                console.log(`   Team ID: ${options.token.teamId}`);
+                console.log(`   Key ID: ${options.token.keyId}`);
+                console.log(`   Environment: ${process.env.NODE_ENV === 'production' ? 'Production' : 'Development'}`);
             } else {
-                console.log('⚠️  APNs credentials not configured - push notifications disabled');
+                console.log('⚠️  APNs credentials not complete - push notifications disabled');
+                this.isConfigured = false;
             }
         } catch (error) {
             console.error('Failed to initialize APNs provider:', error);
@@ -57,7 +75,7 @@ class PushNotificationService {
             notification.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires in 1 hour
             notification.badge = 1;
             notification.sound = 'default';
-            notification.topic = process.env.APNS_BUNDLE_ID || 'com.yourcompany.uptime';
+            notification.topic = this.bundleId || process.env.APNS_BUNDLE_ID || 'com.yourcompany.uptime';
             notification.priority = 10;
 
             // Set title and body based on status
@@ -119,7 +137,7 @@ class PushNotificationService {
             notification.expiry = Math.floor(Date.now() / 1000) + 3600;
             notification.badge = 1;
             notification.sound = 'default';
-            notification.topic = process.env.APNS_BUNDLE_ID || 'com.yourcompany.uptime';
+            notification.topic = this.bundleId || process.env.APNS_BUNDLE_ID || 'com.yourcompany.uptime';
             notification.title = '✅ Test Notification';
             notification.body = 'Push notifications are working correctly!';
             notification.payload = { test: true };

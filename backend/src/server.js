@@ -81,7 +81,7 @@ app.listen(PORT, async () => {
         emailService.initialize();
 
         // Initialize push notifications
-        pushNotifications.initialize();
+        await pushNotifications.initialize();
 
         // Start monitoring service
         monitoringService.start();
